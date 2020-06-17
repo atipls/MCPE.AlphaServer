@@ -65,13 +65,17 @@ namespace MCPE.AlphaServer {
                     case RakPacketType.ConnectionRequest: { await Send(Client, ConnectionRequestAcceptedPacket.FromRequest(enclosing.Get<ConnectionRequestPacket>(), endpoint)); break; }
                     case RakPacketType.LoginRequest: {
                         var request = enclosing.Get<LoginRequestPacket>();
-                        Client.Player = new World.MinecraftPlayer(request.Username);
                         var status = request.StatusFor(14);
-                        var response = LoginResponsePacket.FromRequest(request, status);
-                        await Send(
-                            Client,
-                            response,
-                            response.StatusOK ? new StartGamePacket(request.ReliableNum.IntValue) : null
+
+                        Client.Player = new World.MinecraftPlayer(request.Username);
+                        if (Client.Player.Username == "Server") {
+                            await Send(Client, LoginResponsePacket.FromRequest(request, Status.ClientOutdated));
+                            break;
+                        }
+
+                        //TODO(atipls): More checks, check if a the player name is already logged in.
+                        await Send(Client, LoginResponsePacket.FromRequest(request, status),
+                            status == Status.VersionsMatch ? new StartGamePacket(request.ReliableNum.IntValue) : null
                         );
                         break;
                     }
@@ -81,7 +85,7 @@ namespace MCPE.AlphaServer {
                     }
                     case RakPacketType.MovePlayer: {
                         var packet = enclosing.Get<MovePlayerPacket>();
-                        await SendToEveryone(new MessagePacket("Server", $"{Client.Player.Username} moving at [{packet.X}, {packet.Y}, {packet.Z}]"));
+                        await BroadcastMessage($"{Client.Player.Username} moving at [{packet.X}, {packet.Y}, {packet.Z}]");
                         break;
                     }
                     default:
@@ -115,12 +119,14 @@ namespace MCPE.AlphaServer {
             }
         }
 
+        public async Task BroadcastMessage(string message) => await SendToEveryone(new MessagePacket("Server", message));
+
         public void ListenerThread() { while (true) { Task.Run(Update).GetAwaiter().GetResult(); } }
         public void ClientUpdaterThread() {
             while (true) {
                 var disconnected = Clients.Where(x => !x.Value.Valid);
                 foreach (var client in disconnected) {
-                    //TODO: Events??
+                    //TODO(atipls): Events??
                     Console.WriteLine($"[ -] {client.Key}");
                     Clients.Remove(client.Key);
                 }

@@ -6,7 +6,6 @@ using System.Text;
 namespace MCPE.AlphaServer.Packets {
     public class LoginResponsePacket : RakPacket {
         public LoginStatus Status;
-        public bool StatusOK => Status == LoginStatus.VersionsMatch;
 
         public static LoginResponsePacket FromRequest(LoginRequestPacket packet, LoginStatus status) {
             return new LoginResponsePacket {
