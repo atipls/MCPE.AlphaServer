@@ -10,13 +10,13 @@ namespace MCPE.AlphaServer.Packets {
 
         public static Packet Parse(byte[] data) {
             try {
-                var type = (PacketType)data[0];
-                switch (type) {
+                var type = data[0];
+                switch ((PacketType)type) {
                     case PacketType.UnconnectedPing: return new UnconnectedPingPacket(data);
                     case PacketType.OpenConnectionRequest1:
                     case PacketType.OpenConnectionRequest2: return new OpenConnectionRequestPacket(data);
                     default: {
-                        if (((byte)type & 1 << 7) != 0) // Is the packet for a connected peer?
+                        if ((type & RakNetPacket.IS_CONNECTED) != 0)
                             return new RakNetPacket(data);
                         Console.WriteLine($"Unhandled packet type {type:X}.");
                         Console.WriteLine(Formatters.AsHex(data));

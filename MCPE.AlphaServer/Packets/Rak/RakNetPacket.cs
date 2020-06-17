@@ -11,9 +11,9 @@ namespace MCPE.AlphaServer.Packets {
         public RakTriad SequenceNumber;
         public List<RakPacket> Enclosing;
 
-        const int IS_ACK = 1 << 6;
-        const int IS_NAK = 1 << 5;
-        const int IS_CONNECTED = 1 << 7;
+        public const int IS_ACK = 1 << 6;
+        public const int IS_NAK = 1 << 5;
+        public const int IS_CONNECTED = 1 << 7;
 
         public bool IsACKorNAK => (Flags & (IS_ACK | IS_NAK)) != 0;
 
