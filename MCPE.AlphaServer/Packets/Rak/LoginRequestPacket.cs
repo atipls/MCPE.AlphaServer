@@ -18,6 +18,14 @@ namespace MCPE.AlphaServer.Packets {
             RealmsData = decoder.String();
         }
 
+        public LoginResponsePacket.LoginStatus StatusFor(int version) {
+            if (Protocol1 != Protocol2 || Protocol1 < version)
+                return LoginResponsePacket.LoginStatus.ClientOutdated;
+            if (Protocol1 > version)
+                return LoginResponsePacket.LoginStatus.ServerOutdated;
+            return LoginResponsePacket.LoginStatus.VersionsMatch;
+        }
+
         public override string ToString() => $"LoginRequest {{ Username: {Username}, Protocol: {Protocol1}.{Protocol2}, ClientID: {ClientID:X}, RealmsData: '{RealmsData}' }}";
     }
 }

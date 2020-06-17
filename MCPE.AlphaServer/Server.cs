@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Runtime.CompilerServices;
 using Microsoft.Win32.SafeHandles;
-
+using Status = MCPE.AlphaServer.Packets.LoginResponsePacket.LoginStatus;
 namespace MCPE.AlphaServer {
     class Server {
         public IPEndPoint ListenEndpoints { get; private set; }
@@ -32,18 +32,8 @@ namespace MCPE.AlphaServer {
 
         public async Task Update() {
             var result = await UdpServer.ReceiveAsync();
-            //Console.WriteLine($"[<=] Got {result.Buffer.Length} bytes of data from {result.RemoteEndPoint}.\n[<=]\n{Formatters.AsHex(result.Buffer)}");
             var parsed = Packet.Parse(result.Buffer);
             var endPoint = result.RemoteEndPoint;
-
-            if (parsed.Type != PacketType.RakNetPacket) {
-                Console.WriteLine($"[<=] {parsed}");
-            } else {
-                var packet = parsed.Get<RakNetPacket>();
-                foreach (var enclosing in packet.Enclosing) {
-                    Console.WriteLine($"[<=] {enclosing}");
-                }
-            }
 
             switch (parsed.Type) {
                 case PacketType.UnconnectedPing: { await SendRaw(endPoint, UnconnectedPongPacket.FromPing(parsed.Get<UnconnectedPingPacket>(), Guid, "MCPE.AlphaServer")); break; }
@@ -74,29 +64,19 @@ namespace MCPE.AlphaServer {
                     case RakPacketType.ConnectedPing: { await Send(Client, ConnectedPongPacket.FromPing(enclosing.Get<ConnectedPingPacket>(), StartTime)); break; }
                     case RakPacketType.ConnectionRequest: { await Send(Client, ConnectionRequestAcceptedPacket.FromRequest(enclosing.Get<ConnectionRequestPacket>(), endpoint)); break; }
                     case RakPacketType.LoginRequest: {
-                        var player = Clients[endpoint].Player;
                         var request = enclosing.Get<LoginRequestPacket>();
-
-                        player.Username = request.Username;
-
-                        var status = LoginResponsePacket.LoginStatus.ServerOutdated;
-                        if (request.Protocol1 == request.Protocol2 &&
-                            request.Protocol1 == 14) {
-                            status = LoginResponsePacket.LoginStatus.VersionsMatch;
-                        }
-
-
-                        var responses = new List<RakPacket>();
-                        responses.Add(LoginResponsePacket.FromRequest(request, status));
-                        if (status == LoginResponsePacket.LoginStatus.VersionsMatch) {
-                            responses.Add(new StartGamePacket(request.ReliableNum.IntValue));
-                        }
-
-                        await Send(Client, responses.ToArray());
+                        Client.Player = new World.MinecraftPlayer(request.Username);
+                        var status = request.StatusFor(14);
+                        var response = LoginResponsePacket.FromRequest(request, status);
+                        await Send(
+                            Client,
+                            response,
+                            response.StatusOK ? new StartGamePacket(request.ReliableNum.IntValue) : null
+                        );
                         break;
                     }
                     case RakPacketType.NewIncomingConnection: {
-                        Console.WriteLine($"[ +] {endpoint} ({Clients[endpoint].Player.Username})");
+                        Console.WriteLine($"[ +] {endpoint}");
                         break;
                     }
                     case RakPacketType.MovePlayer: {

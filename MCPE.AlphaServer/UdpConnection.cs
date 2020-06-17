@@ -16,7 +16,6 @@ namespace MCPE.AlphaServer {
         public UdpConnection(IPEndPoint endpoint) {
             EndPoint = endpoint;
             LastUpdate = DateTime.Now;
-            Player = new MinecraftPlayer();
         }
     }
 }

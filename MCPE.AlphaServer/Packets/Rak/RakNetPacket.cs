@@ -88,8 +88,9 @@ namespace MCPE.AlphaServer.Packets {
                     encoder.Encode(PacketMax);
             } else {
                 encoder.Encode(SequenceNumber);
-                foreach (var enclosing in Enclosing)
-                    encoder.Encode(RakPacket.Create(enclosing));
+                foreach (var enclosing in Enclosing) {
+                    if (enclosing != null) encoder.Encode(RakPacket.Create(enclosing));
+                }
             }
             return encoder.Get();
         }
