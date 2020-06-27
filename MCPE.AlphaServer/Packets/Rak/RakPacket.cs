@@ -32,21 +32,21 @@ namespace MCPE.AlphaServer.Packets {
             var packet = new RakPacket();
 
             switch (msgid) {
-                case RakPacketType.ConnectedPing: packet = new ConnectedPingPacket(ref decoder); break;
-                case RakPacketType.ConnectionRequest: packet = new ConnectionRequestPacket(ref decoder); break;
-                case RakPacketType.NewIncomingConnection: packet = new NewIncomingConnectionPacket(ref decoder); break;
-                case RakPacketType.LoginRequest: packet = new LoginRequestPacket(ref decoder); break;
-                case RakPacketType.Ready: packet = new ReadyPacket(ref decoder); break;
-                case RakPacketType.RequestChunk: packet = new RequestChunkPacket(ref decoder); break;
-                case RakPacketType.MovePlayer: packet = new MovePlayerPacket(ref decoder); break;
-                case RakPacketType.SetHealth: packet = new SetHealthPacket(ref decoder); break;
-                case RakPacketType.Animate: packet = new AnimatePacket(ref decoder); break;
-                case RakPacketType.RemoveBlock: packet = new RemoveBlockPacket(ref decoder); break;
-                case RakPacketType.Message: packet = new MessagePacket(ref decoder); break;
-                case RakPacketType.UseItem: packet = new UseItemPacket(ref decoder); break;
-                default:
-                    Console.WriteLine($"[!!] Unhandled RakPacket Type {msgid}!");
-                    break;
+            case RakPacketType.ConnectedPing: packet = new ConnectedPingPacket(ref decoder); break;
+            case RakPacketType.ConnectionRequest: packet = new ConnectionRequestPacket(ref decoder); break;
+            case RakPacketType.NewIncomingConnection: packet = new NewIncomingConnectionPacket(ref decoder); break;
+            case RakPacketType.LoginRequest: packet = new LoginRequestPacket(ref decoder); break;
+            case RakPacketType.Ready: packet = new ReadyPacket(ref decoder); break;
+            case RakPacketType.RequestChunk: packet = new RequestChunkPacket(ref decoder); break;
+            case RakPacketType.MovePlayer: packet = new MovePlayerPacket(ref decoder); break;
+            case RakPacketType.SetHealth: packet = new SetHealthPacket(ref decoder); break;
+            case RakPacketType.Animate: packet = new AnimatePacket(ref decoder); break;
+            case RakPacketType.RemoveBlock: packet = new RemoveBlockPacket(ref decoder); break;
+            case RakPacketType.Message: packet = new MessagePacket(ref decoder); break;
+            case RakPacketType.UseItem: packet = new UseItemPacket(ref decoder); break;
+            default:
+                Console.WriteLine($"[!!] Unhandled RakPacket Type {msgid}!");
+                break;
             }
             packet.MessageFlags = flags;
             packet.Length = length;

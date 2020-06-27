@@ -7,7 +7,7 @@ namespace MCPE.AlphaServer {
     class Program {
         static async Task Main(string[] _) {
             Console.WriteLine("Starting MCPE.AlphaServer.");
-            
+
             // For RakEncoder
             Debug.Assert(BitConverter.IsLittleEndian);
 

@@ -11,6 +11,8 @@ using System.Threading;
 using System.Runtime.CompilerServices;
 using Microsoft.Win32.SafeHandles;
 using Status = MCPE.AlphaServer.Packets.LoginResponsePacket.LoginStatus;
+using System.Linq.Expressions;
+
 namespace MCPE.AlphaServer {
     class Server {
         public IPEndPoint ListenEndpoints { get; private set; }
@@ -36,16 +38,17 @@ namespace MCPE.AlphaServer {
             var endPoint = result.RemoteEndPoint;
 
             switch (parsed.Type) {
-                case PacketType.UnconnectedPing: { await SendRaw(endPoint, UnconnectedPongPacket.FromPing(parsed.Get<UnconnectedPingPacket>(), Guid, "MCPE.AlphaServer")); break; }
-                case PacketType.OpenConnectionRequest1: { await SendRaw(endPoint, OpenConnectionReplyPacket.FromRequest(parsed.Get<OpenConnectionRequestPacket>(), Guid, endPoint)); break; }
-                case PacketType.OpenConnectionRequest2: {
-                    var packet = parsed.Get<OpenConnectionRequestPacket>();
-                    Clients.Add(endPoint, new UdpConnection(endPoint));
-                    await SendRaw(endPoint, OpenConnectionReplyPacket.FromRequest(packet, Guid, endPoint));
-                    break;
-                }
-                case PacketType.RakNetPacket: { await HandleRakNetPacket(parsed.Get<RakNetPacket>(), endPoint); break; }
-                default: break;
+            case PacketType.UnconnectedPing: { await SendRaw(endPoint, UnconnectedPongPacket.FromPing(parsed.Get<UnconnectedPingPacket>(), Guid, "MCPE.AlphaServer")); break; }
+            case PacketType.OpenConnectionRequest1: { await SendRaw(endPoint, OpenConnectionReplyPacket.FromRequest(parsed.Get<OpenConnectionRequestPacket>(), Guid, endPoint)); break; }
+            case PacketType.OpenConnectionRequest2: {
+                var packet = parsed.Get<OpenConnectionRequestPacket>();
+                var Client = new UdpConnection(endPoint);
+                Clients.Add(endPoint, Client);
+                await SendRaw(endPoint, OpenConnectionReplyPacket.FromRequest(packet, Guid, endPoint));
+                break;
+            }
+            case PacketType.RakNetPacket: { await HandleRakNetPacket(parsed.Get<RakNetPacket>(), endPoint); break; }
+            default: break;
             }
         }
 
@@ -57,39 +60,49 @@ namespace MCPE.AlphaServer {
 
             foreach (var enclosing in rakPacket.Enclosing) {
                 switch (enclosing.MessageID) {
-                    case RakPacketType.ConnectedPong: {
-                        Console.WriteLine("[<=] PONG!");
+                case RakPacketType.ConnectedPong: {
+                    Console.WriteLine("[<=] PONG!");
+                    break;
+                }
+                case RakPacketType.ConnectedPing: { await Send(Client, ConnectedPongPacket.FromPing(enclosing.Get<ConnectedPingPacket>(), StartTime)); break; }
+                case RakPacketType.ConnectionRequest: { await Send(Client, ConnectionRequestAcceptedPacket.FromRequest(enclosing.Get<ConnectionRequestPacket>(), endpoint)); break; }
+                case RakPacketType.LoginRequest: {
+                    var request = enclosing.Get<LoginRequestPacket>();
+                    var status = request.StatusFor(14);
+
+                    Client.Player = new World.MinecraftPlayer(request.Username, request.ClientID);
+                    if (Client.Player.Username == "server" || // Don't impersonate the server.
+                        Clients.Any(x => x.Value?.Player?.Username == request.Username && x.Value != Client)) { // Don't log in if there's a player already in game.
+                        await Send(Client, LoginResponsePacket.FromRequest(request, Status.ClientOutdated));
                         break;
                     }
-                    case RakPacketType.ConnectedPing: { await Send(Client, ConnectedPongPacket.FromPing(enclosing.Get<ConnectedPingPacket>(), StartTime)); break; }
-                    case RakPacketType.ConnectionRequest: { await Send(Client, ConnectionRequestAcceptedPacket.FromRequest(enclosing.Get<ConnectionRequestPacket>(), endpoint)); break; }
-                    case RakPacketType.LoginRequest: {
-                        var request = enclosing.Get<LoginRequestPacket>();
-                        var status = request.StatusFor(14);
 
-                        Client.Player = new World.MinecraftPlayer(request.Username);
-                        if (Client.Player.Username == "Server") {
-                            await Send(Client, LoginResponsePacket.FromRequest(request, Status.ClientOutdated));
-                            break;
+                    //TODO(atipls): More checks, check if a the player name is already logged in.
+                    await Send(Client, LoginResponsePacket.FromRequest(request, status),
+                        status == Status.VersionsMatch ? new StartGamePacket(request.ReliableNum.IntValue) : null
+                    );
+
+                    foreach (var UClient in Clients) {
+                        if (UClient.Value?.Player?.Username != "" && UClient.Value?.Player?.Username != Client.Player.Username) {
+                            await Send(UClient.Value, new AddPlayerPacket(UClient.Value.Player));
+                            Console.WriteLine("YOO");
                         }
+                    }
 
-                        //TODO(atipls): More checks, check if a the player name is already logged in.
-                        await Send(Client, LoginResponsePacket.FromRequest(request, status),
-                            status == Status.VersionsMatch ? new StartGamePacket(request.ReliableNum.IntValue) : null
-                        );
-                        break;
-                    }
-                    case RakPacketType.NewIncomingConnection: {
-                        Console.WriteLine($"[ +] {endpoint}");
-                        break;
-                    }
-                    case RakPacketType.MovePlayer: {
-                        var packet = enclosing.Get<MovePlayerPacket>();
-                        await BroadcastMessage($"{Client.Player.Username} moving at [{packet.X}, {packet.Y}, {packet.Z}]");
-                        break;
-                    }
-                    default:
-                        break;
+                    break;
+                }
+                case RakPacketType.NewIncomingConnection: {
+                    Console.WriteLine($"[ +] {endpoint}");
+                    break;
+                }
+                case RakPacketType.MovePlayer: {
+                    var packet = enclosing.Get<MovePlayerPacket>();
+                    await BroadcastMessage($"{Client.Player.Username} moving at [{packet.X}, {packet.Y}, {packet.Z}]");
+                    break;
+                }
+                default:
+                    Console.WriteLine($"Unhandled RakPacket: {enclosing.MessageID}");
+                    break;
                 }
             }
 
@@ -119,7 +132,7 @@ namespace MCPE.AlphaServer {
             }
         }
 
-        public async Task BroadcastMessage(string message) => await SendToEveryone(new MessagePacket("Server", message));
+        public async Task BroadcastMessage(string message) => await SendToEveryone(new MessagePacket("server", message));
 
         public void ListenerThread() { while (true) { Task.Run(Update).GetAwaiter().GetResult(); } }
         public void ClientUpdaterThread() {

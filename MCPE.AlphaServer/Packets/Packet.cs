@@ -12,16 +12,16 @@ namespace MCPE.AlphaServer.Packets {
             try {
                 var type = data[0];
                 switch ((PacketType)type) {
-                    case PacketType.UnconnectedPing: return new UnconnectedPingPacket(data);
-                    case PacketType.OpenConnectionRequest1:
-                    case PacketType.OpenConnectionRequest2: return new OpenConnectionRequestPacket(data);
-                    default: {
-                        if ((type & RakNetPacket.IS_CONNECTED) != 0)
-                            return new RakNetPacket(data);
-                        Console.WriteLine($"Unhandled packet type {type:X}.");
-                        Console.WriteLine(Formatters.AsHex(data));
-                        break;
-                    }
+                case PacketType.UnconnectedPing: return new UnconnectedPingPacket(data);
+                case PacketType.OpenConnectionRequest1:
+                case PacketType.OpenConnectionRequest2: return new OpenConnectionRequestPacket(data);
+                default: {
+                    if ((type & RakNetPacket.IS_CONNECTED) != 0)
+                        return new RakNetPacket(data);
+                    Console.WriteLine($"Unhandled packet type {type:X}.");
+                    Console.WriteLine(Formatters.AsHex(data));
+                    break;
+                }
                 }
             } catch (Exception ex) {
                 Console.WriteLine($"Error while parsing a packet: {ex.Message}");

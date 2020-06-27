@@ -11,7 +11,7 @@ namespace MCPE.AlphaServer.Packets {
         public byte ProtocolVersion;
         public RakAddress Address;
         public short MtuSize;
-        public ulong ClientGuid;
+        public ulong ClientID;
 
         public OpenConnectionRequestPacket(byte[] data) {
             RakDecoder decoder = new RakDecoder(data);
@@ -19,15 +19,15 @@ namespace MCPE.AlphaServer.Packets {
             Type = (PacketType)decoder.Byte();
             decoder.Magic();
             switch (Type) {
-                case PacketType.OpenConnectionRequest1:
-                    ProtocolVersion = decoder.Byte();
-                    break;
-                case PacketType.OpenConnectionRequest2:
-                    Address = decoder.Address();
-                    MtuSize = decoder.Short();
-                    ClientGuid = decoder.Long().Unsigned();
-                    break;
-                default: Debug.Assert(false, "Unreachable."); break;
+            case PacketType.OpenConnectionRequest1:
+                ProtocolVersion = decoder.Byte();
+                break;
+            case PacketType.OpenConnectionRequest2:
+                Address = decoder.Address();
+                MtuSize = decoder.Short();
+                ClientID = decoder.Long().Unsigned();
+                break;
+            default: Debug.Assert(false, "Unreachable."); break;
             }
 
             // Null padding
@@ -37,7 +37,7 @@ namespace MCPE.AlphaServer.Packets {
         public override string ToString() {
             if (Type == PacketType.OpenConnectionRequest1)
                 return $"OpenConnectionRequestPacket {{ Type: {Type}, ProtocolVersion: {ProtocolVersion:X} }}";
-            return $"OpenConnectionRequestPacket {{ Type: {Type}, ServerAddress: {Address}, MtuSize: {MtuSize}, ClientGuid: {ClientGuid:X8} }}";
+            return $"OpenConnectionRequestPacket {{ Type: {Type}, ServerAddress: {Address}, MtuSize: {MtuSize}, ClientID: {ClientID:X8} }}";
         }
     }
 }

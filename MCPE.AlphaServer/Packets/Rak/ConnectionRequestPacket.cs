@@ -12,6 +12,6 @@ namespace MCPE.AlphaServer.Packets {
             TimeSinceStart = decoder.Timestamp();
             UseEncryption = decoder.Byte();
         }
-        public override string ToString() => $"ConnectionRequest {{ ClientGuid: {ClientGuid:X}, TimeSinceStart: {TimeSinceStart}, Unknown: {UseEncryption} }}";
+        public override string ToString() => $"ConnectionRequest {{ ClientID: {ClientGuid:X}, TimeSinceStart: {TimeSinceStart}, Unknown: {UseEncryption} }}";
     }
 }

@@ -31,20 +31,20 @@ namespace MCPE.AlphaServer.Packets {
             encoder.AddMagic();
 
             switch (Type) {
-                case PacketType.OpenConnectionReply1: {
-                    encoder.Encode(ServerGuid.Signed());
-                    encoder.Encode(UseEncryption);
-                    encoder.Encode(MtuSize);
-                    break;
-                }
-                case PacketType.OpenConnectionReply2: {
-                    encoder.Encode(ServerGuid.Signed());
-                    encoder.Encode(ClientAddress);
-                    encoder.Encode(MtuSize);
-                    encoder.Encode(UseEncryption);
-                    break;
-                }
-                default: Debug.Assert(false, "Unreachable."); break;
+            case PacketType.OpenConnectionReply1: {
+                encoder.Encode(ServerGuid.Signed());
+                encoder.Encode(UseEncryption);
+                encoder.Encode(MtuSize);
+                break;
+            }
+            case PacketType.OpenConnectionReply2: {
+                encoder.Encode(ServerGuid.Signed());
+                encoder.Encode(ClientAddress);
+                encoder.Encode(MtuSize);
+                encoder.Encode(UseEncryption);
+                break;
+            }
+            default: Debug.Assert(false, "Unreachable."); break;
             }
 
             return encoder.Get();
