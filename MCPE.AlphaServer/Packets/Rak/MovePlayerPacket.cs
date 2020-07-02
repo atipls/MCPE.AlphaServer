@@ -1,6 +1,7 @@
 ﻿using MCPE.AlphaServer.Utils;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 
 namespace MCPE.AlphaServer.Packets {
@@ -8,6 +9,9 @@ namespace MCPE.AlphaServer.Packets {
         public int ID;
         public float X, Y, Z;
         public float Pitch, Yaw, Roll;
+
+        public Vector3 Position => new Vector3(X, Y, Z);
+
         public MovePlayerPacket(ref RakDecoder decoder) {
             ID = decoder.Int();
             X = decoder.Float();

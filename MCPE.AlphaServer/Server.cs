@@ -31,7 +31,6 @@ namespace MCPE.AlphaServer {
             StartTime = DateTime.Now;
             IsRunning = true;
         }
-
         public async Task Update() {
             var result = await UdpServer.ReceiveAsync();
             var parsed = Packet.Parse(result.Buffer);
@@ -82,8 +81,9 @@ namespace MCPE.AlphaServer {
                         status == Status.VersionsMatch ? new StartGamePacket(request.ReliableNum.IntValue) : null
                     );
 
+
                     foreach (var UClient in Clients) {
-                        if (UClient.Value?.Player?.Username != "" && UClient.Value?.Player?.Username != Client.Player.Username) {
+                        if (UClient.Value?.Player?.Username != Client.Player.Username) {
                             await Send(UClient.Value, new AddPlayerPacket(UClient.Value.Player));
                             Console.WriteLine("YOO");
                         }
@@ -97,6 +97,8 @@ namespace MCPE.AlphaServer {
                 }
                 case RakPacketType.MovePlayer: {
                     var packet = enclosing.Get<MovePlayerPacket>();
+                    Client.Player.Position = packet.Position;
+
                     await BroadcastMessage($"{Client.Player.Username} moving at [{packet.X}, {packet.Y}, {packet.Z}]");
                     break;
                 }

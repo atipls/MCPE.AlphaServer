@@ -19,6 +19,11 @@ namespace MCPE.AlphaServer.Packets {
             ID = player.ID;
             Username = player.Username;
             EID = player.EID;
+            X = player.Position.X;
+            Y = player.Position.Y;
+            Z = player.Position.Z;
+            Pitch = 0;
+            Yaw = 0;
             Metadata = new byte[] { };
         }
 

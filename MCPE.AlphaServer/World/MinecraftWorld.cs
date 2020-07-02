@@ -1,6 +1,7 @@
 ﻿using MCPE.AlphaServer.Utils;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace MCPE.AlphaServer.World {
@@ -9,9 +10,8 @@ namespace MCPE.AlphaServer.World {
         public List<MinecraftPlayer> Players;
         public Dictionary<string, object> Metadata;
 
-        public static MinecraftWorld Load(string directory) {
-            //NamedBinaryTag.TaggedValue v = new NamedBinaryTag.TaggedValue();
-            return null;
-        }
+        public int LastEID; // Last Entity ID
+
+        public MinecraftPlayer GetPlayerByName(string name) => Players.FirstOrDefault(P => P.Username == name);
     }
 }
