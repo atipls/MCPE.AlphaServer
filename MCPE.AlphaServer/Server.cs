@@ -1,5 +1,6 @@
 ﻿using MCPE.AlphaServer.Packets;
 using MCPE.AlphaServer.Utils;
+using MCPE.AlphaServer.Game;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -8,13 +9,13 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
-using System.Runtime.CompilerServices;
-using Microsoft.Win32.SafeHandles;
 using Status = MCPE.AlphaServer.Packets.LoginResponsePacket.LoginStatus;
-using System.Linq.Expressions;
 
 namespace MCPE.AlphaServer {
-    class Server {
+    public class Server {
+        public static Server The;
+        public World World => World.The;
+
         public IPEndPoint ListenEndpoints { get; private set; }
         public UdpClient UdpServer { get; private set; }
         public DateTime StartTime { get; private set; }
@@ -30,6 +31,7 @@ namespace MCPE.AlphaServer {
             Clients = new Dictionary<IPEndPoint, UdpConnection>();
             StartTime = DateTime.Now;
             IsRunning = true;
+            World.The = new World();
         }
         public async Task Update() {
             var result = await UdpServer.ReceiveAsync();
@@ -69,7 +71,7 @@ namespace MCPE.AlphaServer {
                     var request = enclosing.Get<LoginRequestPacket>();
                     var status = request.StatusFor(14);
 
-                    Client.Player = new World.MinecraftPlayer(request.Username, request.ClientID);
+                    Client.Player = new Player(request.Username, request.ClientID);
                     if (Client.Player.Username == "server" || // Don't impersonate the server.
                         Clients.Any(x => x.Value?.Player?.Username == request.Username && x.Value != Client)) { // Don't log in if there's a player already in game.
                         await Send(Client, LoginResponsePacket.FromRequest(request, Status.ClientOutdated));
@@ -81,13 +83,7 @@ namespace MCPE.AlphaServer {
                         status == Status.VersionsMatch ? new StartGamePacket(request.ReliableNum.IntValue) : null
                     );
 
-
-                    foreach (var UClient in Clients) {
-                        if (UClient.Value?.Player?.Username != Client.Player.Username) {
-                            await Send(UClient.Value, new AddPlayerPacket(UClient.Value.Player));
-                            Console.WriteLine("YOO");
-                        }
-                    }
+                    World.AddPlayer(Client);
 
                     break;
                 }
@@ -97,8 +93,7 @@ namespace MCPE.AlphaServer {
                 }
                 case RakPacketType.MovePlayer: {
                     var packet = enclosing.Get<MovePlayerPacket>();
-                    Client.Player.Position = packet.Position;
-
+                    // World.MovePlayer(Client, packet.Position, packet.Pitch, packet.Yaw);
                     await BroadcastMessage($"{Client.Player.Username} moving at [{packet.X}, {packet.Y}, {packet.Z}]");
                     break;
                 }

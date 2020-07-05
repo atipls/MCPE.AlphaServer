@@ -11,10 +11,10 @@ namespace MCPE.AlphaServer {
             // For RakEncoder
             Debug.Assert(BitConverter.IsLittleEndian);
 
-            Server server = new Server(19132);
+            Server.The = new Server(19132);
 
-            var listenerThread = new Thread(server.ListenerThread);
-            var updaterThread = new Thread(server.ClientUpdaterThread);
+            var listenerThread = new Thread(Server.The.ListenerThread);
+            var updaterThread = new Thread(Server.The.ClientUpdaterThread);
 
             listenerThread.Name = "Listener Thread";
             updaterThread.Name = "Updater Thread";
@@ -25,7 +25,7 @@ namespace MCPE.AlphaServer {
             listenerThread.Join();
             updaterThread.Join();
 
-            while (server.IsRunning)
+            while (Server.The.IsRunning)
                 await Task.Delay(100);
         }
     }

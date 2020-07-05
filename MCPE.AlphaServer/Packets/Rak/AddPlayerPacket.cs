@@ -1,5 +1,5 @@
 ﻿using MCPE.AlphaServer.Utils;
-using MCPE.AlphaServer.World;
+using MCPE.AlphaServer.Game;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,7 +14,7 @@ namespace MCPE.AlphaServer.Packets {
         public short ItemID, ItemAuxValue; // For active item (?)
         public byte[] Metadata;
 
-        public AddPlayerPacket(MinecraftPlayer player) {
+        public AddPlayerPacket(Player player) {
             MessageID = RakPacketType.AddPlayer;
             ID = player.ID;
             Username = player.Username;

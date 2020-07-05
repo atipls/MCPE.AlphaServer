@@ -5,17 +5,17 @@ using System.Text;
 
 namespace MCPE.AlphaServer.Packets {
     public class RemoveBlockPacket : RakPacket {
-        public int ID;
+        public int EID;
         public int X, Z;
         public byte Y;
 
         public RemoveBlockPacket(ref RakDecoder decoder) {
-            ID = decoder.Int();
+            EID = decoder.Int();
             X = decoder.Int();
             Z = decoder.Int();
             Y = decoder.Byte();
         }
 
-        public override string ToString() => $"RemoveBlock {{ Pos: [{X}, {Y}, {Z}], ID: {ID} }}";
+        public override string ToString() => $"RemoveBlock {{ Pos: [{X}, {Y}, {Z}], EID: {EID} }}";
     }
 }

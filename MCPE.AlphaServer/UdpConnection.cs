@@ -1,5 +1,5 @@
 ﻿using MCPE.AlphaServer.Utils;
-using MCPE.AlphaServer.World;
+using MCPE.AlphaServer.Game;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -10,7 +10,7 @@ namespace MCPE.AlphaServer {
         public IPEndPoint EndPoint;
         public DateTime LastUpdate;
         public RakTriad Sequence;
-        public MinecraftPlayer Player;
+        public Player Player;
 
         public bool Valid => (DateTime.Now - LastUpdate).TotalSeconds < 10;
         public UdpConnection(IPEndPoint endpoint) {
