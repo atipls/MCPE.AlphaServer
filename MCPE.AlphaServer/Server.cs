@@ -83,8 +83,7 @@ namespace MCPE.AlphaServer {
                         status == Status.VersionsMatch ? new StartGamePacket(request.ReliableNum.IntValue) : null
                     );
 
-                    World.AddPlayer(Client);
-
+                    await World.AddPlayer(Client);
                     break;
                 }
                 case RakPacketType.NewIncomingConnection: {
@@ -93,8 +92,7 @@ namespace MCPE.AlphaServer {
                 }
                 case RakPacketType.MovePlayer: {
                     var packet = enclosing.Get<MovePlayerPacket>();
-                    // World.MovePlayer(Client, packet.Position, packet.Pitch, packet.Yaw);
-                    await BroadcastMessage($"{Client.Player.Username} moving at [{packet.X}, {packet.Y}, {packet.Z}]");
+                    await World.MovePlayer(Client, packet.Position, packet.Pitch, packet.Yaw);
                     break;
                 }
                 default:
