@@ -35,6 +35,7 @@ namespace MCPE.AlphaServer.Packets {
             case RakPacketType.ConnectedPing: packet = new ConnectedPingPacket(ref decoder); break;
             case RakPacketType.ConnectionRequest: packet = new ConnectionRequestPacket(ref decoder); break;
             case RakPacketType.NewIncomingConnection: packet = new NewIncomingConnectionPacket(ref decoder); break;
+            case RakPacketType.PlayerDisconnect: break;
             case RakPacketType.LoginRequest: packet = new LoginRequestPacket(ref decoder); break;
             case RakPacketType.Ready: packet = new ReadyPacket(ref decoder); break;
             case RakPacketType.RequestChunk: packet = new RequestChunkPacket(ref decoder); break;

@@ -27,7 +27,7 @@ namespace MCPE.AlphaServer {
         public Server(int port) : this(new IPEndPoint(IPAddress.Any, port)) { }
         public Server(IPEndPoint endpoints) {
             ListenEndpoints = endpoints;
-            UdpServer = new UdpClient(endpoints);
+            UdpServer = new UdpClient(endpoints.Port);
             Clients = new Dictionary<IPEndPoint, UdpConnection>();
             StartTime = DateTime.Now;
             IsRunning = true;
@@ -49,11 +49,15 @@ namespace MCPE.AlphaServer {
                 break;
             }
             case PacketType.RakNetPacket: { await HandleRakNetPacket(parsed.Get<RakNetPacket>(), endPoint); break; }
-            default: break;
+            default:
+                break;
             }
         }
 
         async Task HandleRakNetPacket(RakNetPacket rakPacket, IPEndPoint endpoint) {
+            if (!Clients.ContainsKey(endpoint))
+                return;
+
             var Client = Clients[endpoint];
             Client.LastUpdate = DateTime.Now;
             if (!rakPacket.IsACKorNAK)
@@ -73,7 +77,7 @@ namespace MCPE.AlphaServer {
 
                     Client.Player = new Player(request.Username, request.ClientID);
                     if (Client.Player.Username == "server" || // Don't impersonate the server.
-                        Clients.Any(x => x.Value?.Player?.Username == request.Username && x.Value != Client)) { // Don't log in if there's a player already in game.
+                        World.GetPlayerByName(request.Username) != null) { // Don't log in if there's a player already in game.
                         await Send(Client, LoginResponsePacket.FromRequest(request, Status.ClientOutdated));
                         break;
                     }
@@ -86,13 +90,30 @@ namespace MCPE.AlphaServer {
                     await World.AddPlayer(Client);
                     break;
                 }
+                case RakPacketType.Ready: {
+                    // Notify the new client about existing players.
+                    foreach (var P in World.Players) {
+                        if (P == Client)
+                            continue;
+                        await Send(Client, new AddPlayerPacket(P.Player));
+                    }
+                    break;
+                }
                 case RakPacketType.NewIncomingConnection: {
                     Console.WriteLine($"[ +] {endpoint}");
+                    break;
+                }
+                case RakPacketType.Message: {
+                    await SendToEveryone(enclosing.Get<MessagePacket>());
                     break;
                 }
                 case RakPacketType.MovePlayer: {
                     var packet = enclosing.Get<MovePlayerPacket>();
                     await World.MovePlayer(Client, packet.Position, packet.Pitch, packet.Yaw);
+                    break;
+                }
+                case RakPacketType.PlayerDisconnect: {
+                    Client.ForceInvalidate = true;
                     break;
                 }
                 default:
@@ -132,13 +153,18 @@ namespace MCPE.AlphaServer {
         public void ListenerThread() { while (true) { Task.Run(Update).GetAwaiter().GetResult(); } }
         public void ClientUpdaterThread() {
             while (true) {
-                var disconnected = Clients.Where(x => !x.Value.Valid);
-                foreach (var client in disconnected) {
-                    //TODO(atipls): Events??
-                    Console.WriteLine($"[ -] {client.Key}");
-                    Clients.Remove(client.Key);
+                lock (Clients) {
+                    var disconnected = Clients.Where(x => !x.Value.Valid || x.Value.ForceInvalidate);
+                    foreach (var client in disconnected) {
+                        //TODO(atipls): Events??
+                        Console.WriteLine($"[ -] {client.Key}");
+
+                        _ = SendToEveryone(new RemovePlayerPacket(client.Value.Player));
+                        Clients.Remove(client.Key);
+                        World.Players.Remove(client.Value);
+                    }
+                    Thread.Sleep(100);
                 }
-                Thread.Sleep(100);
             }
         }
     }

@@ -63,5 +63,6 @@ namespace MCPE.AlphaServer.Packets {
 
         ConnectionRequestAccepted = 0x10,
         NewIncomingConnection = 0x13,
+        PlayerDisconnect = 0x15,
     }
 }

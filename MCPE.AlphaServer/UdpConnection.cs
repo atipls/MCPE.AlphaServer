@@ -13,6 +13,8 @@ namespace MCPE.AlphaServer {
         public Player Player;
 
         public bool Valid => (DateTime.Now - LastUpdate).TotalSeconds < 10;
+        public bool ForceInvalidate = false;
+
         public UdpConnection(IPEndPoint endpoint) {
             EndPoint = endpoint;
             LastUpdate = DateTime.Now;

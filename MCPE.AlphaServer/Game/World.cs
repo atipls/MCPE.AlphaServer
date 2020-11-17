@@ -19,24 +19,27 @@ namespace MCPE.AlphaServer.Game {
         public int LastEID; // Last Entity ID
 
         public UdpConnection GetPlayerByName(string name) => Players.FirstOrDefault(P => P.Player?.Username == name);
-        public async Task AddPlayer(UdpConnection player) {
-            player.Player.EID = LastEID++;
+        public async Task AddPlayer(UdpConnection toAdd) {
+            var newPlayer = Server.Clients[toAdd.EndPoint];
+
+            newPlayer.Player.EID = ++LastEID;
             foreach (var P in Players) {
-                if (P == player)
-                    continue;
-                await Server.Send(player, new AddPlayerPacket(P.Player));
-                await Server.Send(P, new AddPlayerPacket(player.Player));
+                await Server.Send(P, new AddPlayerPacket(newPlayer.Player));
             }
-            Players.Add(player);
+
+            Players.Add(newPlayer);
         }
 
-        public async Task MovePlayer(UdpConnection player, Vector3 position, float pitch, float yaw) {
+
+        public async Task MovePlayer(UdpConnection toMove, Vector3 position, float pitch, float yaw) {
+            var player = Server.Clients[toMove.EndPoint];
+
             player.Player.Position = position;
-            
+
             // Test
             await Server.Send(player, new MovePlayerPacket(position, player.Player.EID, new Vector3(pitch, yaw + 1f, 0f)));
-            
-            
+
+
             foreach (var P in Players) {
                 if (P == player)
                     continue;
