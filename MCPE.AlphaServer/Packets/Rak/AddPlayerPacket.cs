@@ -12,6 +12,8 @@ namespace MCPE.AlphaServer.Packets {
         public float X, Y, Z;
         public byte Yaw, Pitch;
         public short ItemID, ItemAuxValue; // For active item (?)
+        
+        // Synced Entity Data
         public byte[] Metadata;
 
         public AddPlayerPacket(Player player) {
@@ -24,7 +26,7 @@ namespace MCPE.AlphaServer.Packets {
             Z = player.Position.Z;
             Pitch = 0;
             Yaw = 0;
-            Metadata = new byte[] { };
+            Metadata = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
         }
 
         public override byte[] Serialize() {
@@ -41,7 +43,7 @@ namespace MCPE.AlphaServer.Packets {
             encoder.Encode(ItemID);
             encoder.Encode(ItemAuxValue);
 
-            encoder.Encode((byte)0); // Metadata length
+            encoder.Encode((byte)Metadata.Length); // Metadata length
             encoder.Encode(Metadata);
 
             return encoder.Get();
