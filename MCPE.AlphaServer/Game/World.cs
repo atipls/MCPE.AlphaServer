@@ -35,21 +35,10 @@ namespace MCPE.AlphaServer.Game {
 
             player.Player.Position = position;
 
-            //// Test
-            await Server.Send(player, new MovePlayerPacket(position, player.Player.EID, new Vector3(pitch, yaw + 1f, 0f)));
-
-            // for (int i = 0; i < 10; i++) {
-            //     for (float f = 95; f < 105; f++) {
-            //         for (float g = 95; g < 105; g++) {
-            //             await Server.Send(player, new MovePlayerPacket(new Vector3(f, 80, g), i, new Vector3(1f, 1f, 0f)));
-            //         }
-            //     }
-            // }
-
             foreach (var P in Players) {
                 if (P.Player.CID == player.Player.CID)
                     continue;
-                await Server.Send(P, new MovePlayerPacket(position, P.Player.EID, new Vector3(pitch, yaw, 0f)));
+                await Server.Send(P, new MovePlayerPacket(position, player.Player.EID, new Vector3(pitch, yaw, 0f)));
             }
         }
     }
