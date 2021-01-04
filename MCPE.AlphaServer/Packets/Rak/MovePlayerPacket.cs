@@ -23,6 +23,7 @@ namespace MCPE.AlphaServer.Packets {
         }
 
         public MovePlayerPacket(Vector3 position, int id, Vector3 rotation) {
+            MessageID = RakPacketType.MovePlayer;
             ID = id;
             X = position.X;
             Y = position.Y;
@@ -39,8 +40,8 @@ namespace MCPE.AlphaServer.Packets {
             encoder.Encode(X);
             encoder.Encode(Y);
             encoder.Encode(Z);
-            encoder.Encode(Pitch);
             encoder.Encode(Yaw);
+            encoder.Encode(Pitch);
             encoder.Encode(Roll);
 
             return encoder.Get();

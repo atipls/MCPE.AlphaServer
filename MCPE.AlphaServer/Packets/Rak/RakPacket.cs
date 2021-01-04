@@ -45,6 +45,7 @@ namespace MCPE.AlphaServer.Packets {
             case RakPacketType.RemoveBlock: packet = new RemoveBlockPacket(ref decoder); break;
             case RakPacketType.Message: packet = new MessagePacket(ref decoder); break;
             case RakPacketType.UseItem: packet = new UseItemPacket(ref decoder); break;
+            case RakPacketType.Interact: packet = new InteractPacket(ref decoder); break;
             default:
                 Console.WriteLine($"[!!] Unhandled RakPacket Type {msgid}!");
                 break;

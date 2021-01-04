@@ -13,12 +13,14 @@ namespace MCPE.AlphaServer.Packets {
         public float PosY;
         public float PosZ;
 
-        public StartGamePacket(int relnum) {
+        public StartGamePacket(int relnum, int entityID) {
             MessageFlags = IS_RELIABLE;
             ReliableNum = RakTriad.FromInt(relnum, false);
             MessageID = RakPacketType.StartGame;
+            EntityID = entityID;
             LevelSeed = 1;
             PosX = PosY = PosZ = 100.0f;
+            PosY = 70f;
         }
 
         public override byte[] Serialize() {

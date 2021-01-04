@@ -6,7 +6,7 @@ using System.Text;
 
 namespace MCPE.AlphaServer.Packets {
     public class AddPlayerPacket : RakPacket {
-        public long ID;
+        public ulong ID;
         public string Username;
         public int EID;
         public float X, Y, Z;
@@ -16,7 +16,7 @@ namespace MCPE.AlphaServer.Packets {
 
         public AddPlayerPacket(Player player) {
             MessageID = RakPacketType.AddPlayer;
-            ID = player.ID;
+            ID = player.CID;
             Username = player.Username;
             EID = player.EID;
             X = player.Position.X;

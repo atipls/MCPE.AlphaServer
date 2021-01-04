@@ -5,9 +5,15 @@ using System.Text;
 
 namespace MCPE.AlphaServer.Packets {
     public class InteractPacket : RakPacket {
-        public byte[] Action; // NOTE(atipls): 8 bits (?)
+        public byte Action;
         public int EID;
         public int Target;
+
+        public InteractPacket(ref RakDecoder decoder) {
+            Action = decoder.Byte();
+            EID = decoder.Int();
+            Target = decoder.Int();
+        }
 
         public override byte[] Serialize() => throw new NotImplementedException();
     }

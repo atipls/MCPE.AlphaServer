@@ -7,12 +7,12 @@ using System.Text;
 namespace MCPE.AlphaServer.Packets {
     public class RemovePlayerPacket : RakPacket {
         public int EID;
-        public long ID;
+        public ulong ID;
 
         public RemovePlayerPacket(Player player) {
             MessageID = RakPacketType.RemovePlayer;
             EID = player.EID;
-            ID = player.ID;
+            ID = player.CID;
         }
 
         public override byte[] Serialize() {

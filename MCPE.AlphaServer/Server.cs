@@ -38,6 +38,8 @@ namespace MCPE.AlphaServer {
             var parsed = Packet.Parse(result.Buffer);
             var endPoint = result.RemoteEndPoint;
 
+//            Console.WriteLine($"{parsed}");
+
             switch (parsed.Type) {
             case PacketType.UnconnectedPing: { await SendRaw(endPoint, UnconnectedPongPacket.FromPing(parsed.Get<UnconnectedPingPacket>(), Guid, "MCPE.AlphaServer")); break; }
             case PacketType.OpenConnectionRequest1: { await SendRaw(endPoint, OpenConnectionReplyPacket.FromRequest(parsed.Get<OpenConnectionRequestPacket>(), Guid, endPoint)); break; }
@@ -70,24 +72,39 @@ namespace MCPE.AlphaServer {
                     break;
                 }
                 case RakPacketType.ConnectedPing: { await Send(Client, ConnectedPongPacket.FromPing(enclosing.Get<ConnectedPingPacket>(), StartTime)); break; }
-                case RakPacketType.ConnectionRequest: { await Send(Client, ConnectionRequestAcceptedPacket.FromRequest(enclosing.Get<ConnectionRequestPacket>(), endpoint)); break; }
+                case RakPacketType.ConnectionRequest: {
+                    var request = enclosing.Get<ConnectionRequestPacket>();
+                    Client.Player = new Player();
+                    Client.Player.CID = request.ClientGuid;
+                    await Send(Client, ConnectionRequestAcceptedPacket.FromRequest(request, endpoint));
+                    break;
+                }
                 case RakPacketType.LoginRequest: {
                     var request = enclosing.Get<LoginRequestPacket>();
                     var status = request.StatusFor(14);
 
-                    Client.Player = new Player(request.Username, request.ClientID);
+                    Client.Player.Username = request.Username;
                     if (Client.Player.Username == "server" || // Don't impersonate the server.
                         World.GetPlayerByName(request.Username) != null) { // Don't log in if there's a player already in game.
                         await Send(Client, LoginResponsePacket.FromRequest(request, Status.ClientOutdated));
                         break;
                     }
 
+                    // StartGame is when the Client gets it's own EntityID.
+                    Client.Player.EID = World.LastEID++;
+
                     //TODO(atipls): More checks, check if a the player name is already logged in.
                     await Send(Client, LoginResponsePacket.FromRequest(request, status),
-                        status == Status.VersionsMatch ? new StartGamePacket(request.ReliableNum.IntValue) : null
+                        status == Status.VersionsMatch ? new StartGamePacket(request.ReliableNum.IntValue, Client.Player.EID) : null
                     );
 
                     await World.AddPlayer(Client);
+
+                    Console.WriteLine("Players:");
+                    foreach (var player in World.Players) {
+                        Console.WriteLine($"{{ EID: {player.Player.EID} CID: {player.Player.CID} Name: {player.Player.Username} }}");
+                    }
+
                     break;
                 }
                 case RakPacketType.Ready: {
@@ -109,10 +126,12 @@ namespace MCPE.AlphaServer {
                 }
                 case RakPacketType.MovePlayer: {
                     var packet = enclosing.Get<MovePlayerPacket>();
+                    Console.WriteLine($"MovePlayer: {{ ID: {packet.ID} (== {Client.Player.EID} OR == {Client.Player.CID}) }}");
                     await World.MovePlayer(Client, packet.Position, packet.Pitch, packet.Yaw);
                     break;
                 }
                 case RakPacketType.PlayerDisconnect: {
+                    // Let the client updater thread disconnect the player.
                     Client.ForceInvalidate = true;
                     break;
                 }
@@ -159,7 +178,9 @@ namespace MCPE.AlphaServer {
                         //TODO(atipls): Events??
                         Console.WriteLine($"[ -] {client.Key}");
 
+                        // Setting up the async task is fine here, Player isn't used in the packet.
                         _ = SendToEveryone(new RemovePlayerPacket(client.Value.Player));
+
                         Clients.Remove(client.Key);
                         World.Players.Remove(client.Value);
                     }
