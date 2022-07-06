@@ -16,17 +16,11 @@ public class DataWriter {
         stream = new MemoryStream();
     }
 
-    public byte[] GetBytes() {
-        return stream.ToArray();
-    }
+    public int Length => (int) stream.Length;
 
-    public void RawData(byte[] data) {
-        stream.Write(data);
-    }
-
-    public void Byte(byte value) {
-        stream.WriteByte(value);
-    }
+    public byte[] GetBytes() => stream.ToArray();
+    public void RawData(byte[] data) => stream.Write(data);
+    public void Byte(byte value) => stream.WriteByte(value);
 
     public void Short(short value) {
         Span<byte> span = stackalloc byte[2];
@@ -84,9 +78,9 @@ public class DataWriter {
 
     public void Triad(int value) {
         Span<byte> span = stackalloc byte[3];
-        span[0] = (byte) (value & 0xFF);
+        span[2] = (byte)((value >> 16) & 0xFF);
         span[1] = (byte) ((value >> 8) & 0xFF);
-        span[2] = (byte) ((value >> 16) & 0xFF);
+        span[0] = (byte)(value & 0xFF);
         stream.Write(span);
     }
 

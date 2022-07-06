@@ -51,9 +51,7 @@ public class DataReader {
         return Encoding.UTF8.GetString(bytes);
     }
 
-    public int Triad() {
-        return (stream.ReadByte() << 16) | (stream.ReadByte() << 8) | stream.ReadByte();
-    }
+    public int Triad() => stream.ReadByte() | (stream.ReadByte() << 8) | (stream.ReadByte() << 16);
 
     public IPEndPoint IPEndPoint() {
         var version = Byte() == 4 ? 4 : 16; // 16 bytes for ipv6

@@ -43,7 +43,7 @@ public class ConnectedPacket {
         var payloadLength = reader.Short();
         var (reliableIndex, orderingIndex, orderingChannel) = reliability switch {
             RELIABLE => (reader.Triad(), 0, 0),
-            RELIABLE_ORDERED => (reader.Triad(), reader.Triad(), reader.Triad()),
+            RELIABLE_ORDERED => (reader.Triad(), reader.Triad(), reader.Byte()),
             RELIABLE_SEQUENCED => (reader.Triad(), reader.Triad(), 0),
             _ => (0, 0, 0)
         };
@@ -79,8 +79,8 @@ public class ConnectedPacket {
         return metaPacket;
     }
 
-    protected virtual void Decode(ref DataReader reader) => Type = reader.Byte();
-    protected virtual void Encode(ref DataWriter writer) => writer.Byte(Type);
+    public virtual void Decode(ref DataReader reader) => Type = reader.Byte();
+    public virtual void Encode(ref DataWriter writer) => writer.Byte(Type);
 
     public override string ToString() =>
         $"ConnectedPacket(Reliability={Reliability}{Reliability switch {RELIABLE => $", ReliableIndex={ReliableIndex}", RELIABLE_SEQUENCED => $", ReliableIndex={ReliableIndex}, OrderingIndex={OrderingIndex}, OrderingChannel={OrderingChannel}", _ => ""}})";
@@ -90,7 +90,7 @@ public class ConnectedMetaPacket : ConnectedPacket, IEnumerable {
     public bool IsACK { get; set; }
     public (int Min, int Max)[] Ranges { get; set; }
 
-    protected override void Decode(ref DataReader reader) {
+    public override void Decode(ref DataReader reader) {
         IsACK = (reader.Byte() & UnconnectedPacket.IS_ACK) != 0;
 
         var rangeCount = reader.Short();
@@ -105,7 +105,7 @@ public class ConnectedMetaPacket : ConnectedPacket, IEnumerable {
         }
     }
 
-    protected override void Encode(ref DataWriter writer) {
+    public override void Encode(ref DataWriter writer) {
         writer.Byte(IsACK ? (byte) UnconnectedPacket.IS_ACK : (byte) UnconnectedPacket.IS_NAK);
 
         writer.Short((short) Ranges.Length);
@@ -132,13 +132,15 @@ public class ConnectedMetaPacket : ConnectedPacket, IEnumerable {
 public class ConnectedPingPacket : ConnectedPacket {
     public ulong TimeSinceStart;
 
-    protected override void Decode(ref DataReader reader) {
+    public ConnectedPingPacket() => Type = (int) ConnectedPacketType.ConnectedPing;
+
+    public override void Decode(ref DataReader reader) {
         base.Decode(ref reader);
 
         TimeSinceStart = reader.ULong();
     }
 
-    protected override void Encode(ref DataWriter writer) {
+    public override void Encode(ref DataWriter writer) {
         base.Encode(ref writer);
 
         writer.ULong(TimeSinceStart);
@@ -151,14 +153,16 @@ public class ConnectedPongPacket : ConnectedPacket {
     public ulong TimeSinceStart;
     public ulong TimeSinceServerStart;
 
-    protected override void Decode(ref DataReader reader) {
+    public ConnectedPongPacket() => Type = (int)ConnectedPacketType.ConnectedPong;
+
+    public override void Decode(ref DataReader reader) {
         base.Decode(ref reader);
 
         TimeSinceStart = reader.ULong();
         TimeSinceServerStart = reader.ULong();
     }
 
-    protected override void Encode(ref DataWriter writer) {
+    public override void Encode(ref DataWriter writer) {
         base.Encode(ref writer);
 
         writer.ULong(TimeSinceStart);
@@ -174,7 +178,9 @@ public class ConnectionRequestPacket : ConnectedPacket {
     public ulong TimeSinceStart;
     public byte UseEncryption;
 
-    protected override void Decode(ref DataReader reader) {
+    public ConnectionRequestPacket() => Type = (int)ConnectedPacketType.ConnectionRequest;
+
+    public override void Decode(ref DataReader reader) {
         base.Decode(ref reader);
 
         ClientID = reader.ULong();
@@ -182,7 +188,7 @@ public class ConnectionRequestPacket : ConnectedPacket {
         UseEncryption = reader.Byte();
     }
 
-    protected override void Encode(ref DataWriter writer) {
+    public override void Encode(ref DataWriter writer) {
         base.Encode(ref writer);
 
         writer.ULong(ClientID);
@@ -198,7 +204,9 @@ public class ConnectionRequestAcceptedPacket : ConnectedPacket {
     public IPEndPoint EndPoint;
     public ulong TimeSinceStart;
 
-    protected override void Decode(ref DataReader reader) {
+    public ConnectionRequestAcceptedPacket() => Type = (int)ConnectedPacketType.ConnectionRequestAccepted;
+
+    public override void Decode(ref DataReader reader) {
         base.Decode(ref reader);
 
         EndPoint = reader.IPEndPoint();
@@ -212,7 +220,7 @@ public class ConnectionRequestAcceptedPacket : ConnectedPacket {
         reader.ULong(); // Another time since start
     }
 
-    protected override void Encode(ref DataWriter writer) {
+    public override void Encode(ref DataWriter writer) {
         base.Encode(ref writer);
 
         writer.IPEndPoint(EndPoint);
@@ -237,7 +245,9 @@ public class NewIncomingConnectionPacket : ConnectedPacket {
     public ulong TimeSinceStart1;
     public ulong TimeSinceStart2;
 
-    protected override void Decode(ref DataReader reader) {
+    public NewIncomingConnectionPacket() => Type = (int)ConnectedPacketType.NewIncomingConnection;
+
+    public override void Decode(ref DataReader reader) {
         base.Decode(ref reader);
 
         EndPoint = reader.IPEndPoint();
@@ -250,7 +260,7 @@ public class NewIncomingConnectionPacket : ConnectedPacket {
         TimeSinceStart2 = reader.ULong();
     }
 
-    protected override void Encode(ref DataWriter writer) {
+    public override void Encode(ref DataWriter writer) {
         base.Encode(ref writer);
 
         writer.IPEndPoint(EndPoint);
@@ -277,8 +287,8 @@ public class UserPacket : ConnectedPacket {
 
     public UserPacket(Memory<byte> data) => Data = data;
 
-    protected override void Decode(ref DataReader reader) { }
-    protected override void Encode(ref DataWriter writer) { }
+    public override void Decode(ref DataReader reader) { }
+    public override void Encode(ref DataWriter writer) { }
     
     public override string ToString() => $"UserPacket(Data={Data.Length}bytes)";
 }

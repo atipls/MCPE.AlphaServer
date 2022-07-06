@@ -21,7 +21,7 @@ public class RakNetServer {
 
     public ulong GUID { get; }
     public IPEndPoint IP { get; }
-    private UdpClient UDP { get; }
+    internal UdpClient UDP { get; }
     public string ServerName { get; set; } = "gaming 2 real? ";
 
     private IConnectionHandler ConnectionHandler { get; set; }
@@ -34,7 +34,7 @@ public class RakNetServer {
         ConnectionHandler = connectionHandler;
 
         StartRepeatingTask(HandlePackets, TimeSpan.Zero);
-        StartRepeatingTask(HandleConnections, TimeSpan.FromSeconds(1));
+        StartRepeatingTask(HandleConnections, TimeSpan.FromMilliseconds(1));
     }
 
     public void Stop() {
@@ -67,7 +67,7 @@ public class RakNetServer {
                 break;
             case OpenConnectionRequest2Packet request:
                 Logger.Debug($"Handling connection request from {receiveResult.RemoteEndPoint}");
-                var newConnetion = new RakNetConnection(receiveResult.RemoteEndPoint) {
+                var newConnetion = new RakNetConnection(receiveResult.RemoteEndPoint, this) {
                     ClientID = request.ClientID
                 };
 
@@ -85,6 +85,9 @@ public class RakNetServer {
     }
 
     private async Task HandleConnections() {
+        foreach (var (_, connections) in Connections)
+            await connections.HandleOutgoing();
+
         await Task.Delay(1);
     }
 

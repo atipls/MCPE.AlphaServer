@@ -7,7 +7,6 @@ namespace MCPE.AlphaServer;
 public class GameServer : IConnectionHandler {
     public void OnOpen(RakNetConnection address) {
         Logger.Debug($"[+] {address}");
-        throw new NotImplementedException();
     }
 
     public void OnClose(RakNetConnection address, string reason) {
