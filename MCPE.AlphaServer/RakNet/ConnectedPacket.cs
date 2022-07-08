@@ -22,12 +22,12 @@ public class ConnectedPacket {
     public const int RELIABLE_ORDERED = 3;
     public const int RELIABLE_SEQUENCED = 4;
 
-    public byte Type;
-    public int OrderingChannel;
-    public int OrderingIndex;
-    public int ReliableIndex;
+    internal byte Type;
+    internal int OrderingChannel;
+    internal int OrderingIndex;
+    internal int ReliableIndex;
 
-    public int Reliability;
+    internal int Reliability;
 
     public ConnectedPacket() {
         Reliability = UNRELIABLE;
@@ -285,6 +285,7 @@ public class PlayerDisconnectPacket : ConnectedPacket {
 public class UserPacket : ConnectedPacket {
     public Memory<byte> Data;
 
+    public UserPacket() => Data = new Memory<byte>();
     public UserPacket(Memory<byte> data) => Data = data;
 
     public override void Decode(ref DataReader reader) { }

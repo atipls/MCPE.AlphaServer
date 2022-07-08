@@ -2,6 +2,7 @@ using System;
 using System.Buffers.Binary;
 using System.IO;
 using System.Net;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -11,7 +12,7 @@ public class DataReader {
     private readonly MemoryStream stream;
 
     public DataReader(byte[] data) => stream = new MemoryStream(data);
-    public DataReader(Memory<byte> data) => stream = new MemoryStream(data.ToArray());
+    public DataReader(ReadOnlyMemory<byte> data) => stream = new MemoryStream(data.ToArray());
 
     public bool IsEof => stream.Position >= stream.Length;
 
@@ -40,8 +41,8 @@ public class DataReader {
     public long Long() => BinaryPrimitives.ReadInt64BigEndian(Get<long>());
     public ulong ULong() => BinaryPrimitives.ReadUInt64BigEndian(Get<long>());
 
-    public float Float() => BitConverter.ToSingle(Get<float>());
-    public double Double() => BitConverter.ToDouble(Get<double>());
+    public float Float() => BitConverter.UInt32BitsToSingle(UInt());
+    public double Double() => BitConverter.UInt64BitsToDouble(ULong());
 
     public string String() {
         var length = UShort();
@@ -63,5 +64,12 @@ public class DataReader {
 
     public void RakNetMagic() {
         stream.Seek(16, SeekOrigin.Current);
+    }
+
+    public Vector3 Vector3() {
+        float x = Float();
+        float y = Float();
+        float z = Float();
+        return new Vector3(x, y, z);
     }
 }

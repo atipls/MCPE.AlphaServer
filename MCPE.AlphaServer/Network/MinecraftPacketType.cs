@@ -1,6 +1,6 @@
-﻿namespace MCPE.AlphaServer.Network.Packets; 
+﻿namespace MCPE.AlphaServer.Network;
 
-public enum PacketType : byte {
+public enum MinecraftPacketType : byte {
     LoginRequest = 0x82,
     LoginResponse = 0x83,
     Ready = 0x84,

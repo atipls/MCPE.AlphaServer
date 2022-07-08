@@ -8,7 +8,7 @@ using MCPE.AlphaServer.Utils;
 
 namespace MCPE.AlphaServer.RakNet;
 
-public class RakNetConnection {
+public class RakNetClient {
     public enum ConnectionStatus {
         CONNECTING,
         CONNECTED,
@@ -16,12 +16,12 @@ public class RakNetConnection {
         DISCONNECTED
     }
 
-    public RakNetConnection(IPEndPoint endPoint, RakNetServer server) {
+    public RakNetClient(IPEndPoint endPoint, RakNetServer server) {
         IP = endPoint;
         LastPing = DateTime.Now;
         Status = ConnectionStatus.CONNECTING;
         OutgoingPackets = new List<ConnectedPacket>();
-        NeedsACK = new Dictionary<int, bool>();
+        NeedsACK = new SortedSet<int>();
         CurrentSequenceNumber = 0;
         LastReliablePacketIndex = 0;
         Server = server;
@@ -33,21 +33,21 @@ public class RakNetConnection {
     public ConnectionStatus Status { get; set; }
 
     private List<ConnectedPacket> OutgoingPackets { get; }
-    private Dictionary<int, bool> NeedsACK { get; }
+    private SortedSet<int> NeedsACK { get; }
     private int CurrentSequenceNumber;
     private int LastReliablePacketIndex;
-    
+
     internal RakNetServer Server;
 
     public bool IsTimedOut => DateTime.Now - LastPing > TimeSpan.FromSeconds(5);
     public bool IsConnected => !IsTimedOut && Status != ConnectionStatus.DISCONNECTED;
 
-    internal IEnumerable<ReadOnlyMemory<byte>> HandlePacket(byte[] data) {
+    internal void HandlePacket(byte[] data) {
         LastPing = DateTime.Now;
 
-        Logger.Debug(
-            $"{IP} PreProcess: IsACK={data[0] & UnconnectedPacket.IS_ACK}, IsNAK={data[0] & UnconnectedPacket.IS_NAK}, IsConnected={data[0] & UnconnectedPacket.IS_CONNECTED}");
-        Logger.Debug(Formatters.AsHex(data));
+        // Logger.Debug(
+        //        $"{IP} PreProcess: IsACK={data[0] & UnconnectedPacket.IS_ACK}, IsNAK={data[0] & UnconnectedPacket.IS_NAK}, IsConnected={data[0] & UnconnectedPacket.IS_CONNECTED}");
+        // Logger.Debug(Formatters.AsHex(data));
 
         var reader = new DataReader(data);
         if ((data[0] & UnconnectedPacket.IS_ACK) != 0)
@@ -55,9 +55,7 @@ public class RakNetConnection {
         else if ((data[0] & UnconnectedPacket.IS_NAK) != 0)
             HandleNAK(ref reader);
         else if ((data[0] & UnconnectedPacket.IS_CONNECTED) != 0)
-            return HandleConnected(ref reader);
-
-        return Enumerable.Empty<ReadOnlyMemory<byte>>();
+            HandleConnected(ref reader);
     }
 
     private void HandleACK(ref DataReader reader) {
@@ -70,21 +68,19 @@ public class RakNetConnection {
         Logger.Warn($"TODO: HandleNAK {packet}");
     }
 
-    private IEnumerable<ReadOnlyMemory<byte>> HandleConnected(ref DataReader reader) {
+    private void HandleConnected(ref DataReader reader) {
         reader.Byte();
         var sequenceNumber = reader.Triad();
-        NeedsACK[sequenceNumber] = true;
+        NeedsACK.Add(sequenceNumber);
 
-        List<ReadOnlyMemory<byte>> packets = new();
         do {
-            var packet = ConnectedPacket.Parse(ref reader);
-    
-            if (packet.Reliability >= ConnectedPacket.RELIABLE)
-                LastReliablePacketIndex = packet.ReliableIndex;
-
-            switch (packet) {
+            switch (ConnectedPacket.Parse(ref reader)) {
                 case ConnectedPingPacket ping:
                     Logger.Debug($"{IP} Ping: {ping}");
+                    Send(new ConnectedPongPacket {
+                        TimeSinceStart = ping.TimeSinceStart,
+                        TimeSinceServerStart = 0,
+                    }, ConnectedPacket.RELIABLE);
                     break;
                 case ConnectionRequestPacket:
                     Send(new ConnectionRequestAcceptedPacket {
@@ -92,24 +88,42 @@ public class RakNetConnection {
                         TimeSinceStart = 0 // TODO: Fix.
                     }, ConnectedPacket.RELIABLE);
                     break;
-                case NewIncomingConnectionPacket incoming:
-                    Logger.Debug($"{IP} Incoming: {incoming}");
+                case NewIncomingConnectionPacket:
+                    Status = ConnectionStatus.CONNECTED;
+                    Server.OnOpen(this); 
                     break;
-                case UserPacket user:
-                    Logger.Debug($"{IP} User: {user}");
+                case UserPacket user: Server.OnData(this, user.Data); break;
+                case PlayerDisconnectPacket:
+                    Status = ConnectionStatus.DISCONNECTED;
                     break;
-                default:
+                case { } packet:
                     Logger.Warn($"Unhandled {packet}?");
                     break;
             }
         } while (!reader.IsEof);
-
-        return packets;
     }
 
     internal async Task HandleOutgoing() {
-        if (OutgoingPackets.Count < 1)
+        if (OutgoingPackets.Count < 1) {
+            if (NeedsACK.Count < 1)
+                return;
+
+            // Send ACKs.
+            var ackWriter = new DataWriter();
+            ackWriter.Byte(UnconnectedPacket.IS_CONNECTED | UnconnectedPacket.IS_ACK);
+
+            // TODO: Use the range feature from RakNet?
+            ackWriter.Short((short)NeedsACK.Count);
+            foreach (var sequence in NeedsACK) {
+                ackWriter.Byte(1); // Min == max.
+                ackWriter.Triad(sequence);
+            }
+
+            await Server.UDP.SendAsync(ackWriter.GetBytes(), IP);
+
+            NeedsACK.Clear();
             return;
+        }
 
         var writer = new DataWriter();
 
@@ -130,7 +144,7 @@ public class RakNetConnection {
                 case ConnectedPacket.RELIABLE_ORDERED:
                     writer.Triad(packet.ReliableIndex);
                     writer.Triad(packet.OrderingIndex);
-                    writer.Byte((byte) packet.OrderingChannel);
+                    writer.Byte((byte)packet.OrderingChannel);
                     break;
             }
 
@@ -141,7 +155,7 @@ public class RakNetConnection {
         OutgoingPackets.Clear();
     }
 
-    public void Send(ConnectedPacket packet, int reliability) {
+    public void Send(ConnectedPacket packet, int reliability = ConnectedPacket.RELIABLE) {
         if (reliability == ConnectedPacket.RELIABLE) {
             packet.Reliability = reliability;
             packet.ReliableIndex = LastReliablePacketIndex++;

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -9,13 +10,13 @@ using MCPE.AlphaServer.Utils;
 namespace MCPE.AlphaServer.RakNet;
 
 public class RakNetServer {
-    private readonly Dictionary<IPEndPoint, RakNetConnection> Connections;
+    private readonly Dictionary<IPEndPoint, RakNetClient> Connections;
 
     public RakNetServer(int port) {
-        GUID = (ulong) Random.Shared.Next() & ((ulong) Random.Shared.Next() << 32);
+        GUID = (ulong)Random.Shared.Next() & ((ulong)Random.Shared.Next() << 32);
         IP = new IPEndPoint(IPAddress.Any, port);
         UDP = new UdpClient(IP);
-        Connections = new Dictionary<IPEndPoint, RakNetConnection>();
+        Connections = new Dictionary<IPEndPoint, RakNetClient>();
         TaskCancellationToken = new CancellationTokenSource();
     }
 
@@ -28,7 +29,7 @@ public class RakNetServer {
     private CancellationTokenSource TaskCancellationToken { get; }
     private DateTime StartedOn { get; } = DateTime.Now;
 
-    public ulong TimeSinceStart => (ulong) (DateTime.Now - StartedOn).TotalMilliseconds;
+    public ulong TimeSinceStart => (ulong)(DateTime.Now - StartedOn).TotalMilliseconds;
 
     public void Start(IConnectionHandler connectionHandler) {
         ConnectionHandler = connectionHandler;
@@ -47,9 +48,7 @@ public class RakNetServer {
 
         // Try handling the connected packet, might fall through if the client reconnects?
         if (Connections.TryGetValue(receiveResult.RemoteEndPoint, out var existingConnection)) {
-            Logger.Debug($"Letting {existingConnection} handle packet");
-            foreach (var packetData in existingConnection.HandlePacket(receiveResult.Buffer))
-                ConnectionHandler?.OnData(existingConnection, packetData);
+            existingConnection.HandlePacket(receiveResult.Buffer);
             return;
         }
 
@@ -67,7 +66,7 @@ public class RakNetServer {
                 break;
             case OpenConnectionRequest2Packet request:
                 Logger.Debug($"Handling connection request from {receiveResult.RemoteEndPoint}");
-                var newConnetion = new RakNetConnection(receiveResult.RemoteEndPoint, this) {
+                var newConnetion = new RakNetClient(receiveResult.RemoteEndPoint, this) {
                     ClientID = request.ClientID
                 };
 
@@ -85,8 +84,13 @@ public class RakNetServer {
     }
 
     private async Task HandleConnections() {
-        foreach (var (_, connections) in Connections)
-            await connections.HandleOutgoing();
+        foreach (var (_, connection) in Connections)
+            await connection.HandleOutgoing();
+
+        foreach (var (endpoint, client) in Connections.Where(x => !x.Value.IsConnected)) {
+            ConnectionHandler?.OnClose(client, client.IsTimedOut ? "Timed out" : "Disconnected");
+            Connections.Remove(endpoint);
+        }
 
         await Task.Delay(1);
     }
@@ -106,4 +110,8 @@ public class RakNetServer {
         var buffer = writer.GetBytes();
         await UDP.SendAsync(buffer, buffer.Length, endPoint);
     }
+
+    internal void OnOpen(RakNetClient connection) => ConnectionHandler?.OnOpen(connection);
+    internal void OnClose(RakNetClient connection, string reason) => ConnectionHandler?.OnClose(connection, reason);
+    internal void OnData(RakNetClient connection, ReadOnlyMemory<byte> data) => ConnectionHandler?.OnData(connection, data);
 }
