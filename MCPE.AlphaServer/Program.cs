@@ -1,5 +1,8 @@
-﻿using System.Threading;
+﻿using System.IO;
+using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
+using MCPE.AlphaServer.Data;
 using MCPE.AlphaServer.Game;
 using MCPE.AlphaServer.RakNet;
 using MCPE.AlphaServer.Utils;
@@ -10,6 +13,12 @@ namespace MCPE.AlphaServer;
 
 internal static class Program {
     private static async Task Main(string[] _) {
+#if DEBUG
+        Directory.SetCurrentDirectory("D:/sources/MCPE.AlphaServer/");
+#endif
+
+        var worldManager = new WorldManager("Data/MainWorld/");
+
         Logger.LogBackend = new LoggerConfiguration()
             .WriteTo.Console(theme: SystemConsoleTheme.Colored)
             .MinimumLevel.Debug()

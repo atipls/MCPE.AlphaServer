@@ -92,6 +92,8 @@ public class RakNetServer {
             Connections.Remove(endpoint);
         }
 
+        ConnectionHandler?.OnUpdate();
+
         await Task.Delay(1);
     }
 

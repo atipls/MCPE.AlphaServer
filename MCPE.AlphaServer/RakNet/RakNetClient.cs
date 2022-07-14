@@ -60,7 +60,7 @@ public class RakNetClient {
 
     private void HandleACK(ref DataReader reader) {
         var packet = ConnectedPacket.ParseMeta(ref reader);
-        Logger.Warn($"TODO: HandleACK {packet}");
+        //Logger.Warn($"TODO: HandleACK {packet}");
     }
 
     private void HandleNAK(ref DataReader reader) {
@@ -76,7 +76,6 @@ public class RakNetClient {
         do {
             switch (ConnectedPacket.Parse(ref reader)) {
                 case ConnectedPingPacket ping:
-                    Logger.Debug($"{IP} Ping: {ping}");
                     Send(new ConnectedPongPacket {
                         TimeSinceStart = ping.TimeSinceStart,
                         TimeSinceServerStart = 0,
@@ -90,7 +89,7 @@ public class RakNetClient {
                     break;
                 case NewIncomingConnectionPacket:
                     Status = ConnectionStatus.CONNECTED;
-                    Server.OnOpen(this); 
+                    Server.OnOpen(this);
                     break;
                 case UserPacket user: Server.OnData(this, user.Data); break;
                 case PlayerDisconnectPacket:

@@ -1,4 +1,5 @@
-﻿using MCPE.AlphaServer.RakNet;
+﻿using MCPE.AlphaServer.Game;
+using MCPE.AlphaServer.RakNet;
 using MCPE.AlphaServer.Utils;
 using System;
 using System.Collections.Generic;
@@ -111,7 +112,7 @@ public class SetTimePacket : MinecraftPacket {
 
 public class StartGamePacket : MinecraftPacket {
     public int Seed;
-    public int Unknown;
+    public int GeneratorVersion;
     public int Gamemode;
     public int EntityId;
     public Vector3 Pos;
@@ -119,7 +120,7 @@ public class StartGamePacket : MinecraftPacket {
     public override void Decode(ref DataReader reader) {
         reader.Byte(); // Packet type.
         Seed = reader.Int();
-        Unknown = reader.Int();
+        GeneratorVersion = reader.Int();
         Gamemode = reader.Int();
         EntityId = reader.Int();
         Pos = reader.Vector3();
@@ -128,7 +129,7 @@ public class StartGamePacket : MinecraftPacket {
     public override void Encode(ref DataWriter writer) {
         writer.Byte((byte)MinecraftPacketType.StartGame);
         writer.Int(Seed);
-        writer.Int(Unknown);
+        writer.Int(GeneratorVersion);
         writer.Int(Gamemode);
         writer.Int(EntityId);
         writer.Vector3(Pos);
@@ -601,7 +602,7 @@ public class ChunkDataPacket : MinecraftPacket {
     public int X;
     public int Z;
     public byte IsNew;
-    // public Chunk Data; // TODO
+    public byte[] ChunkData;
 
     public override void Decode(ref DataReader reader) {
         reader.Byte(); // Packet type.
@@ -616,7 +617,7 @@ public class ChunkDataPacket : MinecraftPacket {
         writer.Int(X);
         writer.Int(Z);
         writer.Byte(IsNew);
-        // TODO Data
+        writer.RawData(ChunkData);
     }
 }
 
@@ -825,16 +826,16 @@ public class SetRidingPacket : MinecraftPacket {
 }
 
 public class SetHealthPacket : MinecraftPacket {
-    public byte Health;
+    public sbyte Health;
 
     public override void Decode(ref DataReader reader) {
         reader.Byte(); // Packet type.
-        Health = reader.Byte();
+        Health = (sbyte)reader.Byte();
     }
 
     public override void Encode(ref DataWriter writer) {
         writer.Byte((byte)MinecraftPacketType.SetHealth);
-        writer.Byte(Health);
+        writer.Byte((byte)Health);
     }
 }
 
@@ -895,20 +896,31 @@ public class RespawnPacket : MinecraftPacket {
 public class SendInventoryPacket : MinecraftPacket {
     public int EntityId;
     public byte WindowId;
-    // public ItemInstanceList Items;
+    public List<ItemInstance> Items;
 
     public override void Decode(ref DataReader reader) {
         reader.Byte(); // Packet type.
         EntityId = reader.Int();
         WindowId = reader.Byte();
-        // Items = default; // TODO
+        Items = new List<ItemInstance>();
+        for (int i = 0; i < reader.Short(); i++)
+            Items.Add(new ItemInstance {
+                ItemID = reader.UShort(),
+                Count = reader.Byte(),
+                AuxValue = reader.UShort()
+            });
     }
 
     public override void Encode(ref DataWriter writer) {
         writer.Byte((byte)MinecraftPacketType.SendInventory);
         writer.Int(EntityId);
         writer.Byte(WindowId);
-        // TODO Items
+        writer.Short((short)Items.Count);
+        for (int i = 0; i < Items.Count; i++) {
+            writer.UShort((ushort)Items[i].ItemID);
+            writer.Byte(Items[i].Count);
+            writer.UShort((ushort)Items[i].AuxValue);
+        }
     }
 }
 
@@ -1011,18 +1023,45 @@ public class ContainerSetDataPacket : MinecraftPacket {
 
 public class ContainerSetContentPacket : MinecraftPacket {
     public byte WindowId;
-    // public ItemInstanceList Items;
+    public List<ItemInstance> Items;
+    public List<int> Hotbar;
 
     public override void Decode(ref DataReader reader) {
         reader.Byte(); // Packet type.
         WindowId = reader.Byte();
-        // Items = default; // TODO
+        Items = new List<ItemInstance>();
+        for (int i = 0; i < reader.Short(); i++)
+            Items.Add(new ItemInstance {
+                ItemID = reader.UShort(),
+                Count = reader.Byte(),
+                AuxValue = reader.UShort()
+            });
+
+        if (WindowId != 0)
+            return;
+
+        Hotbar = new List<int>();
+        for (int i = 0; i < reader.Short(); i++)
+            Hotbar.Add(reader.Int());
+
     }
 
     public override void Encode(ref DataWriter writer) {
         writer.Byte((byte)MinecraftPacketType.ContainerSetContent);
         writer.Byte(WindowId);
-        // TODO Items
+        writer.Short((short)Items.Count);
+        for (int i = 0; i < Items.Count; i++) {
+            writer.UShort((ushort)Items[i].ItemID);
+            writer.Byte(Items[i].Count);
+            writer.UShort((ushort)Items[i].AuxValue);
+        }
+
+        if (WindowId != 0)
+            return;
+
+        writer.Short((short)Hotbar.Count);
+        for (int i = 0; i < Hotbar.Count; i++)
+            writer.Int(Hotbar[i]);
     }
 }
 
