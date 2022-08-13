@@ -1,45 +1,76 @@
-﻿using MCPE.AlphaServer.Packets;
+﻿using MCPE.AlphaServer.Network;
+using MCPE.AlphaServer.RakNet;
 using MCPE.AlphaServer.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace MCPE.AlphaServer.Game {
-    public class World {
-        public static World The;
-        public Server Server => Server.The;
+namespace MCPE.AlphaServer.Game;
 
-        public List<Entity> Entities = new List<Entity>();
-        public List<UdpConnection> Players = new List<UdpConnection>();
-        public Dictionary<string, object> Metadata = new Dictionary<string, object>();
+public class World {
+    private GameServer Server;
 
-        public int LastEID; // Last Entity ID
+    public List<Entity> Entities = new();
+    private readonly Dictionary<RakNetClient, Player> ConnectionMap = new();
+    public IEnumerable<Player> Players => ConnectionMap.Values;
 
-        public UdpConnection GetPlayerByName(string name) => Players.FirstOrDefault(P => P.Player?.Username == name);
-        public async Task AddPlayer(UdpConnection toAdd) {
-            var newPlayer = Server.Clients[toAdd.EndPoint];
+    public World(GameServer server) => Server = server;
 
-            foreach (var P in Players) {
-                await Server.Send(P, new AddPlayerPacket(newPlayer.Player));
-            }
+    public void SendAll(ConnectedPacket packet, ulong except = 0) {
+        foreach (var player in Players)
+            if (player.PlayerID != except)
+                player.Send(packet);
+    }
 
-            Players.Add(newPlayer);
-        }
+    // public RakNetConnection GetPlayerByName(string name) => Players.FirstOrDefault(P => P.Player?.Username == name);
+
+    public Player AddPlayer(RakNetClient client, ulong clientId, string username) {
+        var newPlayer = new Player(client) {
+            PlayerID = clientId,
+            Username = username
+        };
+
+        SendAll(new AddPlayerPacket {
+            PlayerId = newPlayer.PlayerID,
+            Username = newPlayer.Username,
+            EntityId = newPlayer.EntityID,
+            Pos = newPlayer.Position,
+        });
 
 
-        public async Task MovePlayer(UdpConnection toMove, Vector3 position, float pitch, float yaw) {
-            var player = Server.Clients[toMove.EndPoint];
+        ConnectionMap.Add(client, newPlayer);
+        return ConnectionMap[client];
+    }
 
-            player.Player.Position = position;
+    public void RemovePlayer(RakNetClient client, string reason) {
+        if (!ConnectionMap.TryGetValue(client, out var disconnectingPlayer))
+            return;
 
-            foreach (var P in Players) {
-                if (P.Player.CID == player.Player.CID)
-                    continue;
-                await Server.Send(P, new MovePlayerPacket(position, player.Player.EID, new Vector3(pitch, yaw, 0f)));
-            }
-        }
+        ConnectionMap.Remove(client);
+
+        SendAll(new RemovePlayerPacket {
+            EntityId = disconnectingPlayer.EntityID,
+            PlayerId = disconnectingPlayer.PlayerID,
+        });
+
+        SendAll(new ChatPacket {
+            Message = $"{disconnectingPlayer.Username} left the game. ({reason})"
+        });
+
+    }
+
+    public void MovePlayer(RakNetClient client, Vector3 position, Vector3 viewAngle) {
+        if (!ConnectionMap.TryGetValue(client, out var movingPlayer))
+            return;
+
+        movingPlayer.Position = position;
+        movingPlayer.ViewAngle = viewAngle;
+
+        SendAll(new MovePlayerPacket {
+            EntityId = movingPlayer.EntityID,
+            Pos = movingPlayer.Position,
+            Rot = movingPlayer.ViewAngle,
+        }, except: movingPlayer.PlayerID);
     }
 }
