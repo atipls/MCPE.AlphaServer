@@ -19,17 +19,17 @@ namespace MCPE.AlphaServer.NBT {
                 if (value == null) {
                     throw new ArgumentNullException(nameof(value));
                 }
+
                 ints = value;
             }
         }
 
-        [NotNull]
-        int[] ints;
+        [NotNull] int[] ints;
 
 
         /// <summary> Creates an unnamed NbtIntArray tag, containing an empty array of ints. </summary>
         public NbtIntArray()
-            : this((string)null) { }
+            : this((string) null) { }
 
 
         /// <summary> Creates an unnamed NbtIntArray tag, containing the given array of ints. </summary>
@@ -58,7 +58,7 @@ namespace MCPE.AlphaServer.NBT {
         public NbtIntArray([CanBeNull] string tagName, [NotNull] int[] value) {
             if (value == null) throw new ArgumentNullException(nameof(value));
             name = tagName;
-            ints = (int[])value.Clone();
+            ints = (int[]) value.Clone();
         }
 
 
@@ -69,7 +69,7 @@ namespace MCPE.AlphaServer.NBT {
         public NbtIntArray([NotNull] NbtIntArray other) {
             if (other == null) throw new ArgumentNullException(nameof(other));
             name = other.name;
-            ints = (int[])other.Value.Clone();
+            ints = (int[]) other.Value.Clone();
         }
 
 
@@ -98,6 +98,7 @@ namespace MCPE.AlphaServer.NBT {
             for (int i = 0; i < length; i++) {
                 Value[i] = readStream.ReadInt32();
             }
+
             return true;
         }
 
@@ -107,6 +108,7 @@ namespace MCPE.AlphaServer.NBT {
             if (length < 0) {
                 throw new NbtFormatException("Negative length given in TAG_Int_Array");
             }
+
             readStream.Skip(length * sizeof(int));
         }
 
@@ -137,10 +139,12 @@ namespace MCPE.AlphaServer.NBT {
             for (int i = 0; i < indentLevel; i++) {
                 sb.Append(indentString);
             }
+
             sb.Append("TAG_Int_Array");
             if (!String.IsNullOrEmpty(Name)) {
                 sb.AppendFormat("(\"{0}\")", Name);
             }
+
             sb.AppendFormat(": [{0} ints]", ints.Length);
         }
     }

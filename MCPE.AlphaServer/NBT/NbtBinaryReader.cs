@@ -26,17 +26,20 @@ namespace MCPE.AlphaServer.NBT {
             int type = ReadByte();
             if (type < 0) {
                 throw new EndOfStreamException();
-            } else if (type > (int)NbtTagType.LongArray) {
+            }
+            else if (type > (int) NbtTagType.LongArray) {
                 throw new NbtFormatException("NBT tag type out of range: " + type);
             }
-            return (NbtTagType)type;
+
+            return (NbtTagType) type;
         }
 
 
         public override short ReadInt16() {
             if (swapNeeded) {
                 return Swap(base.ReadInt16());
-            } else {
+            }
+            else {
                 return base.ReadInt16();
             }
         }
@@ -45,7 +48,8 @@ namespace MCPE.AlphaServer.NBT {
         public override int ReadInt32() {
             if (swapNeeded) {
                 return Swap(base.ReadInt32());
-            } else {
+            }
+            else {
                 return base.ReadInt32();
             }
         }
@@ -54,7 +58,8 @@ namespace MCPE.AlphaServer.NBT {
         public override long ReadInt64() {
             if (swapNeeded) {
                 return Swap(base.ReadInt64());
-            } else {
+            }
+            else {
                 return base.ReadInt64();
             }
         }
@@ -65,7 +70,8 @@ namespace MCPE.AlphaServer.NBT {
                 FillBuffer(sizeof(float));
                 Array.Reverse(buffer, 0, sizeof(float));
                 return BitConverter.ToSingle(buffer, 0);
-            } else {
+            }
+            else {
                 return base.ReadSingle();
             }
         }
@@ -77,6 +83,7 @@ namespace MCPE.AlphaServer.NBT {
                 Array.Reverse(buffer);
                 return BitConverter.ToDouble(buffer, 0);
             }
+
             return base.ReadDouble();
         }
 
@@ -86,6 +93,7 @@ namespace MCPE.AlphaServer.NBT {
             if (length < 0) {
                 throw new NbtFormatException("Negative string length given!");
             }
+
             if (length < stringConversionBuffer.Length) {
                 int stringBytesRead = 0;
                 while (stringBytesRead < length) {
@@ -94,14 +102,18 @@ namespace MCPE.AlphaServer.NBT {
                     if (bytesReadThisTime == 0) {
                         throw new EndOfStreamException();
                     }
+
                     stringBytesRead += bytesReadThisTime;
                 }
+
                 return Encoding.UTF8.GetString(stringConversionBuffer, 0, length);
-            } else {
+            }
+            else {
                 byte[] stringData = ReadBytes(length);
                 if (stringData.Length < length) {
                     throw new EndOfStreamException();
                 }
+
                 return Encoding.UTF8.GetString(stringData);
             }
         }
@@ -110,9 +122,11 @@ namespace MCPE.AlphaServer.NBT {
         public void Skip(int bytesToSkip) {
             if (bytesToSkip < 0) {
                 throw new ArgumentOutOfRangeException(nameof(bytesToSkip));
-            } else if (BaseStream.CanSeek) {
+            }
+            else if (BaseStream.CanSeek) {
                 BaseStream.Position += bytesToSkip;
-            } else if (bytesToSkip != 0) {
+            }
+            else if (bytesToSkip != 0) {
                 if (seekBuffer == null) seekBuffer = new byte[SeekBufferSize];
                 int bytesSkipped = 0;
                 while (bytesSkipped < bytesToSkip) {
@@ -121,6 +135,7 @@ namespace MCPE.AlphaServer.NBT {
                     if (bytesReadThisTime == 0) {
                         throw new EndOfStreamException();
                     }
+
                     bytesSkipped += bytesReadThisTime;
                 }
             }
@@ -142,6 +157,7 @@ namespace MCPE.AlphaServer.NBT {
             if (length < 0) {
                 throw new NbtFormatException("Negative string length given!");
             }
+
             Skip(length);
         }
 
@@ -149,8 +165,8 @@ namespace MCPE.AlphaServer.NBT {
         [DebuggerStepThrough]
         static short Swap(short v) {
             unchecked {
-                return (short)((v >> 8) & 0x00FF |
-                               (v << 8) & 0xFF00);
+                return (short) ((v >> 8) & 0x00FF |
+                                (v << 8) & 0xFF00);
             }
         }
 
@@ -158,11 +174,11 @@ namespace MCPE.AlphaServer.NBT {
         [DebuggerStepThrough]
         static int Swap(int v) {
             unchecked {
-                var v2 = (uint)v;
-                return (int)((v2 >> 24) & 0x000000FF |
-                             (v2 >> 8) & 0x0000FF00 |
-                             (v2 << 8) & 0x00FF0000 |
-                             (v2 << 24) & 0xFF000000);
+                var v2 = (uint) v;
+                return (int) ((v2 >> 24) & 0x000000FF |
+                              (v2 >> 8) & 0x0000FF00 |
+                              (v2 << 8) & 0x00FF0000 |
+                              (v2 << 24) & 0xFF000000);
             }
         }
 
@@ -170,13 +186,12 @@ namespace MCPE.AlphaServer.NBT {
         [DebuggerStepThrough]
         static long Swap(long v) {
             unchecked {
-                return (Swap((int)v) & uint.MaxValue) << 32 |
-                       Swap((int)(v >> 32)) & uint.MaxValue;
+                return (Swap((int) v) & uint.MaxValue) << 32 |
+                       Swap((int) (v >> 32)) & uint.MaxValue;
             }
         }
 
 
-        [CanBeNull]
-        public TagSelector Selector { get; set; }
+        [CanBeNull] public TagSelector Selector { get; set; }
     }
 }

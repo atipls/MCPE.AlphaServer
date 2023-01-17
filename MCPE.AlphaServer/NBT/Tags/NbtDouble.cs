@@ -54,6 +54,7 @@ namespace MCPE.AlphaServer.NBT {
                 readStream.ReadDouble();
                 return false;
             }
+
             Value = readStream.ReadDouble();
             return true;
         }
@@ -87,10 +88,12 @@ namespace MCPE.AlphaServer.NBT {
             for (int i = 0; i < indentLevel; i++) {
                 sb.Append(indentString);
             }
+
             sb.Append("TAG_Double");
             if (!String.IsNullOrEmpty(Name)) {
                 sb.AppendFormat("(\"{0}\")", Name);
             }
+
             sb.Append(": ");
             sb.Append(Value);
         }

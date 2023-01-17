@@ -22,5 +22,7 @@ public class Player : Entity {
     }
 
     public bool IsClientOf(RakNetClient client) => client.ClientID == Client.ClientID;
-    public void Send(ConnectedPacket packet, int reliability = ConnectedPacket.RELIABLE) => Client.Send(packet, reliability);
+
+    public void Send(ConnectedPacket packet, int reliability = ConnectedPacket.RELIABLE) =>
+        Client.Send(packet, reliability);
 }

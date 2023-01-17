@@ -7,9 +7,7 @@ namespace MCPE.AlphaServer.NBT {
     public sealed class NbtLongArray : NbtTag {
         /// <summary> Type of this tag (LongArray). </summary>
         public override NbtTagType TagType {
-            get {
-                return NbtTagType.LongArray;
-            }
+            get { return NbtTagType.LongArray; }
         }
 
         /// <summary> Value/payload of this tag (an array of signed 64-bit integers). Value is stored as-is and is NOT cloned. May not be <c>null</c>. </summary>
@@ -26,12 +24,11 @@ namespace MCPE.AlphaServer.NBT {
             }
         }
 
-        [NotNull]
-        private long[] longs;
+        [NotNull] private long[] longs;
 
         /// <summary> Creates an unnamed NbtLongArray tag, containing an empty array of longs. </summary>
         public NbtLongArray()
-            : this((string)null) { }
+            : this((string) null) { }
 
         /// <summary> Creates an unnamed NbtLongArray tag, containing the given array of longs. </summary>
         /// <param name="value"> Long array to assign to this tag's Value. May not be <c>null</c>. </param>
@@ -57,7 +54,7 @@ namespace MCPE.AlphaServer.NBT {
         public NbtLongArray([CanBeNull] string tagName, [NotNull] long[] value) {
             if (value == null) throw new ArgumentNullException(nameof(value));
             name = tagName;
-            longs = (long[])value.Clone();
+            longs = (long[]) value.Clone();
         }
 
 
@@ -71,7 +68,7 @@ namespace MCPE.AlphaServer.NBT {
             }
 
             name = other.name;
-            longs = (long[])other.longs.Clone();
+            longs = (long[]) other.longs.Clone();
         }
 
 

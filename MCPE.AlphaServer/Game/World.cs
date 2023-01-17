@@ -23,6 +23,8 @@ public class World {
                 player.Send(packet);
     }
 
+    public Player GetByName(string name) => Players.FirstOrDefault(x => x.Username.ToLower() == name.ToLower(), null);
+
     // public RakNetConnection GetPlayerByName(string name) => Players.FirstOrDefault(P => P.Player?.Username == name);
 
     public Player AddPlayer(RakNetClient client, ulong clientId, string username) {
@@ -57,7 +59,6 @@ public class World {
         SendAll(new ChatPacket {
             Message = $"{disconnectingPlayer.Username} left the game. ({reason})"
         });
-
     }
 
     public void MovePlayer(RakNetClient client, Vector3 position, Vector3 viewAngle) {

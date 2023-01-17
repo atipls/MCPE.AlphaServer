@@ -13,7 +13,7 @@ public class RakNetServer {
     private readonly Dictionary<IPEndPoint, RakNetClient> Connections;
 
     public RakNetServer(int port) {
-        GUID = (ulong)Random.Shared.Next() & ((ulong)Random.Shared.Next() << 32);
+        GUID = (ulong) Random.Shared.Next() & ((ulong) Random.Shared.Next() << 32);
         IP = new IPEndPoint(IPAddress.Any, port);
         UDP = new UdpClient(IP);
         Connections = new Dictionary<IPEndPoint, RakNetClient>();
@@ -29,7 +29,7 @@ public class RakNetServer {
     private CancellationTokenSource TaskCancellationToken { get; }
     private DateTime StartedOn { get; } = DateTime.Now;
 
-    public ulong TimeSinceStart => (ulong)(DateTime.Now - StartedOn).TotalMilliseconds;
+    public ulong TimeSinceStart => (ulong) (DateTime.Now - StartedOn).TotalMilliseconds;
 
     public void Start(IConnectionHandler connectionHandler) {
         ConnectionHandler = connectionHandler;
@@ -48,6 +48,7 @@ public class RakNetServer {
 
         // Try handling the connected packet, might fall through if the client reconnects?
         if (Connections.TryGetValue(receiveResult.RemoteEndPoint, out var existingConnection)) {
+            Logger.Debug($"Letting {existingConnection} handle packet");
             existingConnection.HandlePacket(receiveResult.Buffer);
             return;
         }
@@ -59,7 +60,8 @@ public class RakNetServer {
                     new UnconnectedPongPacket(TimeSinceStart, GUID, $"MCCPP;Demo;{ServerName}")
                 );
                 break;
-            case OpenConnectionRequest1Packet:
+            case OpenConnectionRequest1Packet openConnectionRequest1Packet:
+                Logger.Debug($"Received OpenConnectionRequest1Packet from {receiveResult.RemoteEndPoint}");
                 await Send(receiveResult.RemoteEndPoint,
                     new OpenConnectionReply1Packet(GUID, false, 1492) // TODO: MTU Is hardcoded.
                 );
@@ -115,5 +117,7 @@ public class RakNetServer {
 
     internal void OnOpen(RakNetClient connection) => ConnectionHandler?.OnOpen(connection);
     internal void OnClose(RakNetClient connection, string reason) => ConnectionHandler?.OnClose(connection, reason);
-    internal void OnData(RakNetClient connection, ReadOnlyMemory<byte> data) => ConnectionHandler?.OnData(connection, data);
+
+    internal void OnData(RakNetClient connection, ReadOnlyMemory<byte> data) =>
+        ConnectionHandler?.OnData(connection, data);
 }

@@ -45,8 +45,9 @@ namespace MCPE.AlphaServer.NBT {
                 if (Parent is NbtCompound parentAsCompound) {
                     if (value == null) {
                         throw new ArgumentNullException(nameof(value),
-                                                        "Name of tags inside an NbtCompound may not be null.");
-                    } else if (name != null) {
+                            "Name of tags inside an NbtCompound may not be null.");
+                    }
+                    else if (name != null) {
                         parentAsCompound.RenameTag(name, value);
                     }
                 }
@@ -66,9 +67,11 @@ namespace MCPE.AlphaServer.NBT {
                 if (Parent == null) {
                     return Name ?? "";
                 }
+
                 if (Parent is NbtList parentAsList) {
                     return parentAsList.Path + '[' + parentAsList.IndexOf(this) + ']';
-                } else {
+                }
+                else {
                     return Parent.Path + '.' + Name;
                 }
             }
@@ -117,8 +120,9 @@ namespace MCPE.AlphaServer.NBT {
         public byte ByteValue {
             get {
                 if (TagType == NbtTagType.Byte) {
-                    return ((NbtByte)this).Value;
-                } else {
+                    return ((NbtByte) this).Value;
+                }
+                else {
                     throw new InvalidCastException("Cannot get ByteValue from " + GetCanonicalTagName(TagType));
                 }
             }
@@ -131,9 +135,9 @@ namespace MCPE.AlphaServer.NBT {
             get {
                 switch (TagType) {
                     case NbtTagType.Byte:
-                        return ((NbtByte)this).Value;
+                        return ((NbtByte) this).Value;
                     case NbtTagType.Short:
-                        return ((NbtShort)this).Value;
+                        return ((NbtShort) this).Value;
                     default:
                         throw new InvalidCastException("Cannot get ShortValue from " + GetCanonicalTagName(TagType));
                 }
@@ -147,11 +151,11 @@ namespace MCPE.AlphaServer.NBT {
             get {
                 switch (TagType) {
                     case NbtTagType.Byte:
-                        return ((NbtByte)this).Value;
+                        return ((NbtByte) this).Value;
                     case NbtTagType.Short:
-                        return ((NbtShort)this).Value;
+                        return ((NbtShort) this).Value;
                     case NbtTagType.Int:
-                        return ((NbtInt)this).Value;
+                        return ((NbtInt) this).Value;
                     default:
                         throw new InvalidCastException("Cannot get IntValue from " + GetCanonicalTagName(TagType));
                 }
@@ -165,13 +169,13 @@ namespace MCPE.AlphaServer.NBT {
             get {
                 switch (TagType) {
                     case NbtTagType.Byte:
-                        return ((NbtByte)this).Value;
+                        return ((NbtByte) this).Value;
                     case NbtTagType.Short:
-                        return ((NbtShort)this).Value;
+                        return ((NbtShort) this).Value;
                     case NbtTagType.Int:
-                        return ((NbtInt)this).Value;
+                        return ((NbtInt) this).Value;
                     case NbtTagType.Long:
-                        return ((NbtLong)this).Value;
+                        return ((NbtLong) this).Value;
                     default:
                         throw new InvalidCastException("Cannot get LongValue from " + GetCanonicalTagName(TagType));
                 }
@@ -185,17 +189,17 @@ namespace MCPE.AlphaServer.NBT {
             get {
                 switch (TagType) {
                     case NbtTagType.Byte:
-                        return ((NbtByte)this).Value;
+                        return ((NbtByte) this).Value;
                     case NbtTagType.Short:
-                        return ((NbtShort)this).Value;
+                        return ((NbtShort) this).Value;
                     case NbtTagType.Int:
-                        return ((NbtInt)this).Value;
+                        return ((NbtInt) this).Value;
                     case NbtTagType.Long:
-                        return ((NbtLong)this).Value;
+                        return ((NbtLong) this).Value;
                     case NbtTagType.Float:
-                        return ((NbtFloat)this).Value;
+                        return ((NbtFloat) this).Value;
                     case NbtTagType.Double:
-                        return (float)((NbtDouble)this).Value;
+                        return (float) ((NbtDouble) this).Value;
                     default:
                         throw new InvalidCastException("Cannot get FloatValue from " + GetCanonicalTagName(TagType));
                 }
@@ -209,17 +213,17 @@ namespace MCPE.AlphaServer.NBT {
             get {
                 switch (TagType) {
                     case NbtTagType.Byte:
-                        return ((NbtByte)this).Value;
+                        return ((NbtByte) this).Value;
                     case NbtTagType.Short:
-                        return ((NbtShort)this).Value;
+                        return ((NbtShort) this).Value;
                     case NbtTagType.Int:
-                        return ((NbtInt)this).Value;
+                        return ((NbtInt) this).Value;
                     case NbtTagType.Long:
-                        return ((NbtLong)this).Value;
+                        return ((NbtLong) this).Value;
                     case NbtTagType.Float:
-                        return ((NbtFloat)this).Value;
+                        return ((NbtFloat) this).Value;
                     case NbtTagType.Double:
-                        return ((NbtDouble)this).Value;
+                        return ((NbtDouble) this).Value;
                     default:
                         throw new InvalidCastException("Cannot get DoubleValue from " + GetCanonicalTagName(TagType));
                 }
@@ -232,8 +236,9 @@ namespace MCPE.AlphaServer.NBT {
         public byte[] ByteArrayValue {
             get {
                 if (TagType == NbtTagType.ByteArray) {
-                    return ((NbtByteArray)this).Value;
-                } else {
+                    return ((NbtByteArray) this).Value;
+                }
+                else {
                     throw new InvalidCastException("Cannot get ByteArrayValue from " + GetCanonicalTagName(TagType));
                 }
             }
@@ -245,8 +250,9 @@ namespace MCPE.AlphaServer.NBT {
         public int[] IntArrayValue {
             get {
                 if (TagType == NbtTagType.IntArray) {
-                    return ((NbtIntArray)this).Value;
-                } else {
+                    return ((NbtIntArray) this).Value;
+                }
+                else {
                     throw new InvalidCastException("Cannot get IntArrayValue from " + GetCanonicalTagName(TagType));
                 }
             }
@@ -258,8 +264,9 @@ namespace MCPE.AlphaServer.NBT {
         public long[] LongArrayValue {
             get {
                 if (TagType == NbtTagType.LongArray) {
-                    return ((NbtLongArray)this).Value;
-                } else {
+                    return ((NbtLongArray) this).Value;
+                }
+                else {
                     throw new InvalidCastException("Cannot get LongArrayValue from " + GetCanonicalTagName(TagType));
                 }
             }
@@ -273,19 +280,19 @@ namespace MCPE.AlphaServer.NBT {
             get {
                 switch (TagType) {
                     case NbtTagType.String:
-                        return ((NbtString)this).Value;
+                        return ((NbtString) this).Value;
                     case NbtTagType.Byte:
-                        return ((NbtByte)this).Value.ToString(CultureInfo.InvariantCulture);
+                        return ((NbtByte) this).Value.ToString(CultureInfo.InvariantCulture);
                     case NbtTagType.Double:
-                        return ((NbtDouble)this).Value.ToString(CultureInfo.InvariantCulture);
+                        return ((NbtDouble) this).Value.ToString(CultureInfo.InvariantCulture);
                     case NbtTagType.Float:
-                        return ((NbtFloat)this).Value.ToString(CultureInfo.InvariantCulture);
+                        return ((NbtFloat) this).Value.ToString(CultureInfo.InvariantCulture);
                     case NbtTagType.Int:
-                        return ((NbtInt)this).Value.ToString(CultureInfo.InvariantCulture);
+                        return ((NbtInt) this).Value.ToString(CultureInfo.InvariantCulture);
                     case NbtTagType.Long:
-                        return ((NbtLong)this).Value.ToString(CultureInfo.InvariantCulture);
+                        return ((NbtLong) this).Value.ToString(CultureInfo.InvariantCulture);
                     case NbtTagType.Short:
-                        return ((NbtShort)this).Value.ToString(CultureInfo.InvariantCulture);
+                        return ((NbtShort) this).Value.ToString(CultureInfo.InvariantCulture);
                     default:
                         throw new InvalidCastException("Cannot get StringValue from " + GetCanonicalTagName(TagType));
                 }

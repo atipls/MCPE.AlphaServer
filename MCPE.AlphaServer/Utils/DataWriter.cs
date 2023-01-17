@@ -17,7 +17,7 @@ public class DataWriter {
         stream = new MemoryStream();
     }
 
-    public int Length => (int)stream.Length;
+    public int Length => (int) stream.Length;
 
     public byte[] GetBytes() => stream.ToArray();
     public void RawData(byte[] data) => stream.Write(data);
@@ -73,23 +73,23 @@ public class DataWriter {
 
     public void String(string value) {
         var bytes = Encoding.UTF8.GetBytes(value);
-        UShort((ushort)bytes.Length);
+        UShort((ushort) bytes.Length);
         RawData(bytes);
     }
 
     public void Triad(int value) {
         Span<byte> span = stackalloc byte[3];
-        span[2] = (byte)((value >> 16) & 0xFF);
-        span[1] = (byte)((value >> 8) & 0xFF);
-        span[0] = (byte)(value & 0xFF);
+        span[2] = (byte) ((value >> 16) & 0xFF);
+        span[1] = (byte) ((value >> 8) & 0xFF);
+        span[0] = (byte) (value & 0xFF);
         stream.Write(span);
     }
 
     public void IPEndPoint(IPEndPoint value) {
-        Byte((byte)(value.Address.AddressFamily == AddressFamily.InterNetwork ? 0x04 : 0x06));
+        Byte((byte) (value.Address.AddressFamily == AddressFamily.InterNetwork ? 0x04 : 0x06));
         // RakNet does this so routers don't mess with the ips?
-        RawData(value.Address.GetAddressBytes().Select(x => (byte)(x ^ 255)).ToArray());
-        UShort((ushort)value.Port);
+        RawData(value.Address.GetAddressBytes().Select(x => (byte) (x ^ 255)).ToArray());
+        UShort((ushort) value.Port);
     }
 
     public void RakNetMagic() {

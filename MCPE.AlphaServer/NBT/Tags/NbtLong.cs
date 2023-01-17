@@ -56,6 +56,7 @@ namespace MCPE.AlphaServer.NBT {
                 readStream.ReadInt64();
                 return false;
             }
+
             Value = readStream.ReadInt64();
             return true;
         }
@@ -91,10 +92,12 @@ namespace MCPE.AlphaServer.NBT {
             for (int i = 0; i < indentLevel; i++) {
                 sb.Append(indentString);
             }
+
             sb.Append("TAG_Long");
             if (!String.IsNullOrEmpty(Name)) {
                 sb.AppendFormat("(\"{0}\")", Name);
             }
+
             sb.Append(": ");
             sb.Append(Value);
         }

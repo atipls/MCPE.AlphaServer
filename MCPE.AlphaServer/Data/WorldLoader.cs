@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using MCPE.AlphaServer.NBT;
 
 namespace MCPE.AlphaServer.Data;
@@ -45,7 +44,7 @@ public struct Chunk {
 
 public class WorldManager {
     private readonly string BasePath;
-        
+
     public Chunk[,] Chunks;
 
     public WorldManager(string basePath) {
@@ -101,9 +100,11 @@ public class WorldManager {
                     var skyLightOffset = metaOffset + 16384;
                     var blockLightOffset = skyLightOffset + 16384;
 
-                    chunk.Meta[y, z, x] = (byte)(chunkBuffer[metaOffset + i / 2] & ((i & 1) == 0 ? 0x0F : 0xF0));
-                    chunk.SkyLight[y, z, x] = (byte)(chunkBuffer[skyLightOffset + i / 2] & ((i & 1) == 0 ? 0x0F : 0xF0));
-                    chunk.BlockLight[y, z, x] = (byte)(chunkBuffer[blockLightOffset + i / 2] & ((i & 1) == 0 ? 0x0F : 0xF0));
+                    chunk.Meta[y, z, x] = (byte) (chunkBuffer[metaOffset + i / 2] & ((i & 1) == 0 ? 0x0F : 0xF0));
+                    chunk.SkyLight[y, z, x] =
+                        (byte) (chunkBuffer[skyLightOffset + i / 2] & ((i & 1) == 0 ? 0x0F : 0xF0));
+                    chunk.BlockLight[y, z, x] =
+                        (byte) (chunkBuffer[blockLightOffset + i / 2] & ((i & 1) == 0 ? 0x0F : 0xF0));
                 }
             }
         }
@@ -117,7 +118,6 @@ public class WorldManager {
 
         var reader = new NbtFile();
         reader.LoadFromStream(stream, NbtCompression.None);
-
     }
 
     private void LoadEntities() {
@@ -126,12 +126,11 @@ public class WorldManager {
 
         var reader = new NbtFile();
         reader.LoadFromStream(stream, NbtCompression.None);
-
     }
 
-    public void Load() {
+    private void Load() {
         NbtFile.BigEndianByDefault = false;
-        
+
         LoadChunks();
         LoadLevelInfo();
         LoadEntities();

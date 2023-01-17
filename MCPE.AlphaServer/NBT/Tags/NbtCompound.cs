@@ -56,7 +56,7 @@ namespace MCPE.AlphaServer.NBT {
             if (other == null) throw new ArgumentNullException(nameof(other));
             name = other.name;
             foreach (NbtTag tag in other.tags.Values) {
-                Add((NbtTag)tag.Clone());
+                Add((NbtTag) tag.Clone());
             }
         }
 
@@ -68,20 +68,24 @@ namespace MCPE.AlphaServer.NBT {
         /// <exception cref="ArgumentException"> <paramref name="tagName"/> does not match the given tag's actual name;
         /// or given tag already has a Parent. </exception>
         public override NbtTag this[[NotNull] string tagName] {
-            [CanBeNull]
-            get { return Get<NbtTag>(tagName); }
+            [CanBeNull] get { return Get<NbtTag>(tagName); }
             set {
                 if (tagName == null) {
                     throw new ArgumentNullException(nameof(tagName));
-                } else if (value == null) {
+                }
+                else if (value == null) {
                     throw new ArgumentNullException(nameof(value));
-                } else if (value.Name != tagName) {
+                }
+                else if (value.Name != tagName) {
                     throw new ArgumentException("Given tag name must match tag's actual name.");
-                } else if (value.Parent != null) {
+                }
+                else if (value.Parent != null) {
                     throw new ArgumentException("A tag may only be added to one compound/list at a time.");
-                } else if (value == this) {
+                }
+                else if (value == this) {
                     throw new ArgumentException("Cannot add tag to itself");
                 }
+
                 tags[tagName] = value;
                 value.Parent = this;
             }
@@ -99,8 +103,9 @@ namespace MCPE.AlphaServer.NBT {
             if (tagName == null) throw new ArgumentNullException(nameof(tagName));
             NbtTag result;
             if (tags.TryGetValue(tagName, out result)) {
-                return (T)result;
+                return (T) result;
             }
+
             return null;
         }
 
@@ -117,6 +122,7 @@ namespace MCPE.AlphaServer.NBT {
             if (tags.TryGetValue(tagName, out result)) {
                 return result;
             }
+
             return null;
         }
 
@@ -133,9 +139,10 @@ namespace MCPE.AlphaServer.NBT {
             if (tagName == null) throw new ArgumentNullException(nameof(tagName));
             NbtTag tempResult;
             if (tags.TryGetValue(tagName, out tempResult)) {
-                result = (T)tempResult;
+                result = (T) tempResult;
                 return true;
-            } else {
+            }
+            else {
                 result = null;
                 return false;
             }
@@ -155,7 +162,8 @@ namespace MCPE.AlphaServer.NBT {
             if (tags.TryGetValue(tagName, out tempResult)) {
                 result = tempResult;
                 return true;
-            } else {
+            }
+            else {
                 result = null;
                 return false;
             }
@@ -197,6 +205,7 @@ namespace MCPE.AlphaServer.NBT {
             if (!tags.TryGetValue(tagName, out tag)) {
                 return false;
             }
+
             tags.Remove(tagName);
             tag.Parent = null;
             return true;
@@ -210,9 +219,11 @@ namespace MCPE.AlphaServer.NBT {
             if (tags.TryGetValue(newName, out _)) {
                 throw new ArgumentException("Cannot rename: a tag with the name already exists in this compound.");
             }
+
             if (!tags.TryGetValue(oldName, out NbtTag tag)) {
                 throw new ArgumentException("Cannot rename: no tag found to rename.");
             }
+
             tags.Remove(oldName);
             tags.Add(newName, tag);
         }
@@ -297,6 +308,7 @@ namespace MCPE.AlphaServer.NBT {
                     default:
                         throw new NbtFormatException("Unsupported tag type found in NBT_Compound: " + nextTag);
                 }
+
                 newTag.Parent = this;
                 newTag.Name = readStream.ReadString();
                 if (newTag.ReadTag(readStream)) {
@@ -368,6 +380,7 @@ namespace MCPE.AlphaServer.NBT {
                     default:
                         throw new NbtFormatException("Unsupported tag type found in NBT_Compound: " + nextTag);
                 }
+
                 readStream.SkipString();
                 newTag.SkipTag(readStream);
             }
@@ -386,6 +399,7 @@ namespace MCPE.AlphaServer.NBT {
             foreach (NbtTag tag in tags.Values) {
                 tag.WriteTag(writeStream);
             }
+
             writeStream.Write(NbtTagType.End);
         }
 
@@ -418,13 +432,17 @@ namespace MCPE.AlphaServer.NBT {
         public void Add([NotNull] NbtTag newTag) {
             if (newTag == null) {
                 throw new ArgumentNullException(nameof(newTag));
-            } else if (newTag == this) {
+            }
+            else if (newTag == this) {
                 throw new ArgumentException("Cannot add tag to self");
-            } else if (newTag.Name == null) {
+            }
+            else if (newTag.Name == null) {
                 throw new ArgumentException("Only named tags are allowed in compound tags.");
-            } else if (newTag.Parent != null) {
+            }
+            else if (newTag.Parent != null) {
                 throw new ArgumentException("A tag may only be added to one compound/list at a time.");
             }
+
             tags.Add(newTag.Name, newTag);
             newTag.Parent = this;
         }
@@ -435,6 +453,7 @@ namespace MCPE.AlphaServer.NBT {
             foreach (NbtTag tag in tags.Values) {
                 tag.Parent = null;
             }
+
             tags.Clear();
         }
 
@@ -482,6 +501,7 @@ namespace MCPE.AlphaServer.NBT {
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -502,7 +522,7 @@ namespace MCPE.AlphaServer.NBT {
         #region Implementation of ICollection
 
         void ICollection.CopyTo(Array array, int index) {
-            CopyTo((NbtTag[])array, index);
+            CopyTo((NbtTag[]) array, index);
         }
 
 
@@ -527,10 +547,12 @@ namespace MCPE.AlphaServer.NBT {
             for (int i = 0; i < indentLevel; i++) {
                 sb.Append(indentString);
             }
+
             sb.Append("TAG_Compound");
             if (!String.IsNullOrEmpty(Name)) {
                 sb.AppendFormat("(\"{0}\")", Name);
             }
+
             sb.AppendFormat(": {0} entries {{", tags.Count);
 
             if (Count > 0) {
@@ -539,10 +561,12 @@ namespace MCPE.AlphaServer.NBT {
                     tag.PrettyPrint(sb, indentString, indentLevel + 1);
                     sb.Append('\n');
                 }
+
                 for (int i = 0; i < indentLevel; i++) {
                     sb.Append(indentString);
                 }
             }
+
             sb.Append('}');
         }
     }

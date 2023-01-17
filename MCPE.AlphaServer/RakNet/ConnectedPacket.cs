@@ -61,12 +61,12 @@ public class ConnectedPacket {
         };
 
         if (packet is null) return null;
-        
+
         packet.Reliability = reliability;
         packet.ReliableIndex = reliableIndex;
         packet.OrderingIndex = orderingIndex;
         packet.OrderingChannel = orderingChannel;
-        
+
         var payloadReader = new DataReader(payload);
         packet.Decode(ref payloadReader);
 
@@ -153,7 +153,7 @@ public class ConnectedPongPacket : ConnectedPacket {
     public ulong TimeSinceStart;
     public ulong TimeSinceServerStart;
 
-    public ConnectedPongPacket() => Type = (int)ConnectedPacketType.ConnectedPong;
+    public ConnectedPongPacket() => Type = (int) ConnectedPacketType.ConnectedPong;
 
     public override void Decode(ref DataReader reader) {
         base.Decode(ref reader);
@@ -178,7 +178,7 @@ public class ConnectionRequestPacket : ConnectedPacket {
     public ulong TimeSinceStart;
     public byte UseEncryption;
 
-    public ConnectionRequestPacket() => Type = (int)ConnectedPacketType.ConnectionRequest;
+    public ConnectionRequestPacket() => Type = (int) ConnectedPacketType.ConnectionRequest;
 
     public override void Decode(ref DataReader reader) {
         base.Decode(ref reader);
@@ -204,7 +204,7 @@ public class ConnectionRequestAcceptedPacket : ConnectedPacket {
     public IPEndPoint EndPoint;
     public ulong TimeSinceStart;
 
-    public ConnectionRequestAcceptedPacket() => Type = (int)ConnectedPacketType.ConnectionRequestAccepted;
+    public ConnectionRequestAcceptedPacket() => Type = (int) ConnectedPacketType.ConnectionRequestAccepted;
 
     public override void Decode(ref DataReader reader) {
         base.Decode(ref reader);
@@ -245,7 +245,7 @@ public class NewIncomingConnectionPacket : ConnectedPacket {
     public ulong TimeSinceStart1;
     public ulong TimeSinceStart2;
 
-    public NewIncomingConnectionPacket() => Type = (int)ConnectedPacketType.NewIncomingConnection;
+    public NewIncomingConnectionPacket() => Type = (int) ConnectedPacketType.NewIncomingConnection;
 
     public override void Decode(ref DataReader reader) {
         base.Decode(ref reader);
@@ -290,6 +290,6 @@ public class UserPacket : ConnectedPacket {
 
     public override void Decode(ref DataReader reader) { }
     public override void Encode(ref DataWriter writer) { }
-    
+
     public override string ToString() => $"UserPacket(Data={Data.Length}bytes)";
 }

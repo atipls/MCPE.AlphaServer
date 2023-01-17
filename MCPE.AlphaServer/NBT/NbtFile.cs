@@ -34,8 +34,7 @@ namespace MCPE.AlphaServer.NBT {
             }
         }
 
-        [NotNull]
-        NbtCompound rootTag;
+        [NotNull] NbtCompound rootTag;
 
         /// <summary> Whether new NbtFiles should default to big-endian encoding (default: true). </summary>
         public static bool BigEndianByDefault { get; set; }
@@ -50,8 +49,10 @@ namespace MCPE.AlphaServer.NBT {
             get { return defaultBufferSize; }
             set {
                 if (value < 0) {
-                    throw new ArgumentOutOfRangeException(nameof(value), value, "DefaultBufferSize cannot be negative.");
+                    throw new ArgumentOutOfRangeException(nameof(value), value,
+                        "DefaultBufferSize cannot be negative.");
                 }
+
                 defaultBufferSize = value;
             }
         }
@@ -67,6 +68,7 @@ namespace MCPE.AlphaServer.NBT {
                 if (value < 0) {
                     throw new ArgumentOutOfRangeException(nameof(value), value, "BufferSize cannot be negative.");
                 }
+
                 bufferSize = value;
             }
         }
@@ -148,16 +150,17 @@ namespace MCPE.AlphaServer.NBT {
         /// <exception cref="InvalidDataException"> If file compression could not be detected, or decompressing failed. </exception>
         /// <exception cref="NbtFormatException"> If an error occurred while parsing data in NBT format. </exception>
         /// <exception cref="IOException"> If an I/O error occurred while reading the file. </exception>
-        public long LoadFromFile([NotNull] string fileName, NbtCompression compression, [CanBeNull] TagSelector selector) {
+        public long LoadFromFile([NotNull] string fileName, NbtCompression compression,
+            [CanBeNull] TagSelector selector) {
             if (fileName == null) throw new ArgumentNullException(nameof(fileName));
 
             using (
                 var readFileStream = new FileStream(fileName,
-                                                    FileMode.Open,
-                                                    FileAccess.Read,
-                                                    FileShare.Read,
-                                                    FileStreamBufferSize,
-                                                    FileOptions.SequentialScan)) {
+                    FileMode.Open,
+                    FileAccess.Read,
+                    FileShare.Read,
+                    FileStreamBufferSize,
+                    FileOptions.SequentialScan)) {
                 LoadFromStream(readFileStream, compression, selector);
                 FileName = fileName;
                 return readFileStream.Position;
@@ -182,7 +185,7 @@ namespace MCPE.AlphaServer.NBT {
         /// <exception cref="InvalidDataException"> If file compression could not be detected or decompressing failed. </exception>
         /// <exception cref="NbtFormatException"> If an error occurred while parsing data in NBT format. </exception>
         public long LoadFromBuffer([NotNull] byte[] buffer, int index, int length, NbtCompression compression,
-                                   [CanBeNull] TagSelector selector) {
+            [CanBeNull] TagSelector selector) {
             if (buffer == null) throw new ArgumentNullException(nameof(buffer));
 
             using (var ms = new MemoryStream(buffer, index, length)) {
@@ -230,7 +233,8 @@ namespace MCPE.AlphaServer.NBT {
         /// <exception cref="EndOfStreamException"> If file ended earlier than expected. </exception>
         /// <exception cref="InvalidDataException"> If file compression could not be detected, decompressing failed, or given stream does not support reading. </exception>
         /// <exception cref="NbtFormatException"> If an error occurred while parsing data in NBT format. </exception>
-        public long LoadFromStream([NotNull] Stream stream, NbtCompression compression, [CanBeNull] TagSelector selector) {
+        public long LoadFromStream([NotNull] Stream stream, NbtCompression compression,
+            [CanBeNull] TagSelector selector) {
             if (stream == null) throw new ArgumentNullException(nameof(stream));
 
             FileName = null;
@@ -238,7 +242,8 @@ namespace MCPE.AlphaServer.NBT {
             // detect compression, based on the first byte
             if (compression == NbtCompression.AutoDetect) {
                 FileCompression = DetectCompression(stream);
-            } else {
+            }
+            else {
                 FileCompression = compression;
             }
 
@@ -246,7 +251,8 @@ namespace MCPE.AlphaServer.NBT {
             long startOffset = 0;
             if (stream.CanSeek) {
                 startOffset = stream.Position;
-            } else {
+            }
+            else {
                 stream = new ByteCountingStream(stream);
             }
 
@@ -255,10 +261,12 @@ namespace MCPE.AlphaServer.NBT {
                     using (var decStream = new GZipStream(stream, CompressionMode.Decompress, true)) {
                         if (bufferSize > 0) {
                             LoadFromStreamInternal(new BufferedStream(decStream, bufferSize), selector);
-                        } else {
+                        }
+                        else {
                             LoadFromStreamInternal(decStream, selector);
                         }
                     }
+
                     break;
 
                 case NbtCompression.None:
@@ -269,14 +277,17 @@ namespace MCPE.AlphaServer.NBT {
                     if (stream.ReadByte() != 0x78) {
                         throw new InvalidDataException(WrongZLibHeaderMessage);
                     }
+
                     stream.ReadByte();
                     using (var decStream = new DeflateStream(stream, CompressionMode.Decompress, true)) {
                         if (bufferSize > 0) {
                             LoadFromStreamInternal(new BufferedStream(decStream, bufferSize), selector);
-                        } else {
+                        }
+                        else {
                             LoadFromStreamInternal(decStream, selector);
                         }
                     }
+
                     break;
 
                 default:
@@ -286,8 +297,9 @@ namespace MCPE.AlphaServer.NBT {
             // report bytes read
             if (stream.CanSeek) {
                 return stream.Position - startOffset;
-            } else {
-                return ((ByteCountingStream)stream).BytesRead;
+            }
+            else {
+                return ((ByteCountingStream) stream).BytesRead;
             }
         }
 
@@ -312,12 +324,13 @@ namespace MCPE.AlphaServer.NBT {
             if (!stream.CanSeek) {
                 throw new NotSupportedException("Cannot auto-detect compression on a stream that's not seekable.");
             }
+
             int firstByte = stream.ReadByte();
             switch (firstByte) {
                 case -1:
                     throw new EndOfStreamException();
 
-                case (byte)NbtTagType.Compound: // 0x0A
+                case (byte) NbtTagType.Compound: // 0x0A
                     compression = NbtCompression.None;
                     break;
 
@@ -334,6 +347,7 @@ namespace MCPE.AlphaServer.NBT {
                 default:
                     throw new InvalidDataException("Could not auto-detect compression format.");
             }
+
             stream.Seek(-1, SeekOrigin.Current);
             return compression;
         }
@@ -345,9 +359,11 @@ namespace MCPE.AlphaServer.NBT {
             if (firstByte < 0) {
                 throw new EndOfStreamException();
             }
-            if (firstByte != (int)NbtTagType.Compound) {
+
+            if (firstByte != (int) NbtTagType.Compound) {
                 throw new NbtFormatException("Given NBT stream does not start with a TAG_Compound");
             }
+
             var reader = new NbtBinaryReader(stream, BigEndian) {
                 Selector = tagSelector
             };
@@ -379,11 +395,11 @@ namespace MCPE.AlphaServer.NBT {
 
             using (
                 var saveFile = new FileStream(fileName,
-                                              FileMode.Create,
-                                              FileAccess.Write,
-                                              FileShare.None,
-                                              FileStreamBufferSize,
-                                              FileOptions.SequentialScan)) {
+                    FileMode.Create,
+                    FileAccess.Write,
+                    FileShare.None,
+                    FileStreamBufferSize,
+                    FileOptions.SequentialScan)) {
                 return SaveToStream(saveFile, compression);
             }
         }
@@ -464,7 +480,8 @@ namespace MCPE.AlphaServer.NBT {
             long startOffset = 0;
             if (stream.CanSeek) {
                 startOffset = stream.Position;
-            } else {
+            }
+            else {
                 stream = new ByteCountingStream(stream);
             }
 
@@ -479,11 +496,13 @@ namespace MCPE.AlphaServer.NBT {
                         bufferedStream.Flush();
                         checksum = compressStream.Checksum;
                     }
+
                     byte[] checksumBytes = BitConverter.GetBytes(checksum);
                     if (BitConverter.IsLittleEndian) {
                         // Adler32 checksum is big-endian
                         Array.Reverse(checksumBytes);
                     }
+
                     stream.Write(checksumBytes, 0, checksumBytes.Length);
                     break;
 
@@ -494,6 +513,7 @@ namespace MCPE.AlphaServer.NBT {
                         RootTag.WriteTag(new NbtBinaryWriter(bufferedStream, BigEndian));
                         bufferedStream.Flush();
                     }
+
                     break;
 
                 case NbtCompression.None:
@@ -501,13 +521,14 @@ namespace MCPE.AlphaServer.NBT {
                     RootTag.WriteTag(writer);
                     break;
 
-                    // Can't be AutoDetect or unknown: parameter is already validated
+                // Can't be AutoDetect or unknown: parameter is already validated
             }
 
             if (stream.CanSeek) {
                 return stream.Position - startOffset;
-            } else {
-                return ((ByteCountingStream)stream).BytesWritten;
+            }
+            else {
+                return ((ByteCountingStream) stream).BytesWritten;
             }
         }
 
@@ -544,16 +565,20 @@ namespace MCPE.AlphaServer.NBT {
         /// <exception cref="IOException"> If an I/O error occurred while reading the file. </exception>
         [NotNull]
         public static string ReadRootTagName([NotNull] string fileName, NbtCompression compression, bool bigEndian,
-                                             int bufferSize) {
+            int bufferSize) {
             if (fileName == null) {
                 throw new ArgumentNullException(nameof(fileName));
             }
+
             if (!File.Exists(fileName)) {
                 throw new FileNotFoundException("Could not find the given NBT file.", fileName);
             }
+
             if (bufferSize < 0) {
-                throw new ArgumentOutOfRangeException(nameof(bufferSize), bufferSize, "DefaultBufferSize cannot be negative.");
+                throw new ArgumentOutOfRangeException(nameof(bufferSize), bufferSize,
+                    "DefaultBufferSize cannot be negative.");
             }
+
             using (FileStream readFileStream = File.OpenRead(fileName)) {
                 return ReadRootTagName(readFileStream, compression, bigEndian, bufferSize);
             }
@@ -574,11 +599,13 @@ namespace MCPE.AlphaServer.NBT {
         /// <exception cref="NbtFormatException"> If an error occurred while parsing data in NBT format. </exception>
         [NotNull]
         public static string ReadRootTagName([NotNull] Stream stream, NbtCompression compression, bool bigEndian,
-                                             int bufferSize) {
+            int bufferSize) {
             if (stream == null) throw new ArgumentNullException(nameof(stream));
             if (bufferSize < 0) {
-                throw new ArgumentOutOfRangeException(nameof(bufferSize), bufferSize, "DefaultBufferSize cannot be negative.");
+                throw new ArgumentOutOfRangeException(nameof(bufferSize), bufferSize,
+                    "DefaultBufferSize cannot be negative.");
             }
+
             // detect compression, based on the first byte
             if (compression == NbtCompression.AutoDetect) {
                 compression = DetectCompression(stream);
@@ -589,7 +616,8 @@ namespace MCPE.AlphaServer.NBT {
                     using (var decStream = new GZipStream(stream, CompressionMode.Decompress, true)) {
                         if (bufferSize > 0) {
                             return GetRootNameInternal(new BufferedStream(decStream, bufferSize), bigEndian);
-                        } else {
+                        }
+                        else {
                             return GetRootNameInternal(decStream, bigEndian);
                         }
                     }
@@ -601,11 +629,13 @@ namespace MCPE.AlphaServer.NBT {
                     if (stream.ReadByte() != 0x78) {
                         throw new InvalidDataException(WrongZLibHeaderMessage);
                     }
+
                     stream.ReadByte();
                     using (var decStream = new DeflateStream(stream, CompressionMode.Decompress, true)) {
                         if (bufferSize > 0) {
                             return GetRootNameInternal(new BufferedStream(decStream, bufferSize), bigEndian);
-                        } else {
+                        }
+                        else {
                             return GetRootNameInternal(decStream, bigEndian);
                         }
                     }
@@ -622,9 +652,11 @@ namespace MCPE.AlphaServer.NBT {
             int firstByte = stream.ReadByte();
             if (firstByte < 0) {
                 throw new EndOfStreamException();
-            } else if (firstByte != (int)NbtTagType.Compound) {
+            }
+            else if (firstByte != (int) NbtTagType.Compound) {
                 throw new NbtFormatException("Given NBT stream does not start with a TAG_Compound");
             }
+
             var reader = new NbtBinaryReader(stream, bigEndian);
 
             return reader.ReadString();

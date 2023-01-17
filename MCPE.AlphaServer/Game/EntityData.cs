@@ -48,42 +48,41 @@ public class EntityData {
         if (!DefinedData.TryGetValue(id, out var holder))
             throw new Exception("Undefined data id");
 
-        return (T)holder.Value;
+        return (T) holder.Value;
     }
 
-    public void Decode(ref DataReader reader) {
-
-    }
+    public void Decode(ref DataReader reader) { }
 
     public void Encode(ref DataWriter writer) {
         foreach (var (id, holder) in DefinedData) {
             if (!holder.IsDirty) continue;
 
-            writer.Byte((byte)(((int)holder.Type << 5) | id));
+            writer.Byte((byte) (((int) holder.Type << 5) | id));
 
             switch (holder.Type) {
                 case EntityDataType.Byte:
-                    writer.Byte((byte)holder.Value);
+                    writer.Byte((byte) holder.Value);
                     break;
                 case EntityDataType.Short:
-                    writer.Short(BinaryPrimitives.ReverseEndianness((short)holder.Value));
+                    writer.Short(BinaryPrimitives.ReverseEndianness((short) holder.Value));
                     break;
                 case EntityDataType.Int:
-                    writer.Int(BinaryPrimitives.ReverseEndianness((int)holder.Value));
+                    writer.Int(BinaryPrimitives.ReverseEndianness((int) holder.Value));
                     break;
                 case EntityDataType.Float:
-                    writer.UInt(BinaryPrimitives.ReverseEndianness(BitConverter.SingleToUInt32Bits((float)holder.Value)));
+                    writer.UInt(
+                        BinaryPrimitives.ReverseEndianness(BitConverter.SingleToUInt32Bits((float) holder.Value)));
                     break;
                 case EntityDataType.String:
                     var stringValue = holder.Value.ToString();
-                    writer.UShort((ushort)stringValue.Length);
+                    writer.UShort((ushort) stringValue.Length);
                     writer.RawData(Encoding.UTF8.GetBytes(stringValue));
                     break;
                 case EntityDataType.ItemInstance:
-                    var itemInstance = (ItemInstance)holder.Value;
-                    writer.UShort(BinaryPrimitives.ReverseEndianness((ushort)itemInstance.ItemID));
+                    var itemInstance = (ItemInstance) holder.Value;
+                    writer.UShort(BinaryPrimitives.ReverseEndianness((ushort) itemInstance.ItemID));
                     writer.Byte(itemInstance.Count);
-                    writer.UShort(BinaryPrimitives.ReverseEndianness((ushort)itemInstance.AuxValue));
+                    writer.UShort(BinaryPrimitives.ReverseEndianness((ushort) itemInstance.AuxValue));
                     break;
                 case EntityDataType.Pos:
                     throw new NotImplementedException();
@@ -94,5 +93,4 @@ public class EntityData {
 
         writer.Byte(0x7F);
     }
-
 }

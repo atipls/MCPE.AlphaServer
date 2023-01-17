@@ -20,17 +20,17 @@ namespace MCPE.AlphaServer.NBT {
                 if (value == null) {
                     throw new ArgumentNullException(nameof(value));
                 }
+
                 bytes = value;
             }
         }
 
-        [NotNull]
-        byte[] bytes;
+        [NotNull] byte[] bytes;
 
 
         /// <summary> Creates an unnamed NbtByte tag, containing an empty array of bytes. </summary>
         public NbtByteArray()
-            : this((string)null) { }
+            : this((string) null) { }
 
 
         /// <summary> Creates an unnamed NbtByte tag, containing the given array of bytes. </summary>
@@ -59,7 +59,7 @@ namespace MCPE.AlphaServer.NBT {
         public NbtByteArray([CanBeNull] string tagName, [NotNull] byte[] value) {
             if (value == null) throw new ArgumentNullException(nameof(value));
             name = tagName;
-            bytes = (byte[])value.Clone();
+            bytes = (byte[]) value.Clone();
         }
 
 
@@ -70,7 +70,7 @@ namespace MCPE.AlphaServer.NBT {
         public NbtByteArray([NotNull] NbtByteArray other) {
             if (other == null) throw new ArgumentNullException(nameof(other));
             name = other.name;
-            bytes = (byte[])other.Value.Clone();
+            bytes = (byte[]) other.Value.Clone();
         }
 
 
@@ -94,10 +94,12 @@ namespace MCPE.AlphaServer.NBT {
                 readStream.Skip(length);
                 return false;
             }
+
             Value = readStream.ReadBytes(length);
             if (Value.Length < length) {
                 throw new EndOfStreamException();
             }
+
             return true;
         }
 
@@ -107,6 +109,7 @@ namespace MCPE.AlphaServer.NBT {
             if (length < 0) {
                 throw new NbtFormatException("Negative length given in TAG_Byte_Array");
             }
+
             readStream.Skip(length);
         }
 
@@ -135,10 +138,12 @@ namespace MCPE.AlphaServer.NBT {
             for (int i = 0; i < indentLevel; i++) {
                 sb.Append(indentString);
             }
+
             sb.Append("TAG_Byte_Array");
             if (!String.IsNullOrEmpty(Name)) {
                 sb.AppendFormat("(\"{0}\")", Name);
             }
+
             sb.AppendFormat(": [{0} bytes]", bytes.Length);
         }
     }

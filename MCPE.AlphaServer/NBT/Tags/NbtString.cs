@@ -18,12 +18,12 @@ namespace MCPE.AlphaServer.NBT {
                 if (value == null) {
                     throw new ArgumentNullException(nameof(value));
                 }
+
                 stringVal = value;
             }
         }
 
-        [NotNull]
-        string stringVal = "";
+        [NotNull] string stringVal = "";
 
 
         /// <summary> Creates an unnamed NbtString tag with the default value (empty string). </summary>
@@ -65,6 +65,7 @@ namespace MCPE.AlphaServer.NBT {
                 readStream.SkipString();
                 return false;
             }
+
             Value = readStream.ReadString();
             return true;
         }
@@ -100,10 +101,12 @@ namespace MCPE.AlphaServer.NBT {
             for (int i = 0; i < indentLevel; i++) {
                 sb.Append(indentString);
             }
+
             sb.Append("TAG_String");
             if (!String.IsNullOrEmpty(Name)) {
                 sb.AppendFormat("(\"{0}\")", Name);
             }
+
             sb.Append(": \"");
             sb.Append(Value);
             sb.Append('"');
