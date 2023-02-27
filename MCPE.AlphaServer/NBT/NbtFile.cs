@@ -135,6 +135,10 @@ namespace MCPE.AlphaServer.NBT {
         public long LoadFromFile([NotNull] string fileName) {
             return LoadFromFile(fileName, NbtCompression.AutoDetect, null);
         }
+        
+        public long LoadFromFileWithOffset([NotNull] string fileName, int offset) {
+            return LoadFromFileWithOffset(fileName, offset, NbtCompression.AutoDetect, null);
+        }
 
 
         /// <summary> Loads NBT data from a file. Existing <c>RootTag</c> will be replaced. </summary>
@@ -161,6 +165,25 @@ namespace MCPE.AlphaServer.NBT {
                     FileShare.Read,
                     FileStreamBufferSize,
                     FileOptions.SequentialScan)) {
+                LoadFromStream(readFileStream, compression, selector);
+                FileName = fileName;
+                return readFileStream.Position;
+            }
+        }
+        
+        public long LoadFromFileWithOffset([NotNull] string fileName, int offset, NbtCompression compression,
+            [CanBeNull] TagSelector selector) {
+            if (fileName == null) throw new ArgumentNullException(nameof(fileName));
+
+            using (
+                var readFileStream = new FileStream(fileName,
+                    FileMode.Open,
+                    FileAccess.Read,
+                    FileShare.Read,
+                    FileStreamBufferSize,
+                    FileOptions.SequentialScan))
+            {
+                readFileStream.Seek(offset, SeekOrigin.Begin);
                 LoadFromStream(readFileStream, compression, selector);
                 FileName = fileName;
                 return readFileStream.Position;

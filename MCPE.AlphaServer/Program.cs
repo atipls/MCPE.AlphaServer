@@ -3,7 +3,6 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using MCPE.AlphaServer.Data;
 using MCPE.AlphaServer.Game;
 using MCPE.AlphaServer.RakNet;
 using MCPE.AlphaServer.Utils;
@@ -18,23 +17,7 @@ internal static class Program {
         Directory.SetCurrentDirectory("/Users/atipls/work/MCPE.AlphaServer");
 #endif
 
-        var worldManager = new WorldManager("Data/MainWorld/");
-
-        var chunk = worldManager.Chunks[0, 0];
-
-        for (var y = 0; y < 128; y++) {
-            for (var z = 0; z < 16; z++) {
-                for (var x = 0; x < 16; x++) {
-                    var block = chunk[x, y, z].ID;
-                    Console.Write(block == 0 ? " " : "X");
-                }
-
-                Console.WriteLine();
-            }
-
-            Console.WriteLine();
-        }
-
+        var world = World.From("Data/MainWorld/");
 
         Logger.LogBackend = new LoggerConfiguration()
             .WriteTo.Console(theme: SystemConsoleTheme.Colored)

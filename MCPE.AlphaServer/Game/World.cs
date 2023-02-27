@@ -1,77 +1,49 @@
-﻿using MCPE.AlphaServer.Network;
-using MCPE.AlphaServer.RakNet;
-using MCPE.AlphaServer.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
+using System.IO;
 
 namespace MCPE.AlphaServer.Game;
 
-public class World {
-    private GameServer Server;
+using MCPE.AlphaServer.NBT;
 
-    public List<Entity> Entities = new();
-    private readonly Dictionary<RakNetClient, Player> ConnectionMap = new();
-    public IEnumerable<Player> Players => ConnectionMap.Values;
-
-    public World(GameServer server) => Server = server;
-
-    public void SendAll(ConnectedPacket packet, ulong except = 0) {
-        foreach (var player in Players)
-            if (player.PlayerID != except)
-                player.Send(packet);
-    }
-
-    public Player GetByName(string name) => Players.FirstOrDefault(x => x.Username.ToLower() == name.ToLower(), null);
-
-    // public RakNetConnection GetPlayerByName(string name) => Players.FirstOrDefault(P => P.Player?.Username == name);
-
-    public Player AddPlayer(RakNetClient client, ulong clientId, string username) {
-        var newPlayer = new Player(client) {
-            PlayerID = clientId,
-            Username = username
+public class World
+{
+    private Chunk[,] _chunks;
+    private NbtFile _levelDat;
+    private NbtFile _entitiesDat;
+    
+    public Chunk this[int x, int z] => _chunks[x, z];
+    
+    public static World From(string folder)
+    {
+        NbtFile.BigEndianByDefault = false;
+        
+        var world = new World()
+        {
+            _chunks = new Chunk[16, 16],
+            _levelDat = new NbtFile(),
+            _entitiesDat = new NbtFile()
         };
+        
+        world._levelDat.LoadFromFileWithOffset(Path.Combine(folder, "level.dat"), 8);
+        world._entitiesDat.LoadFromFileWithOffset(Path.Combine(folder, "entities.dat"), 12);
+        
+        using var chunksDat = File.OpenRead(Path.Combine(folder, "chunks.dat"));
+        using var chunkReader = new BinaryReader(chunksDat);
+        
+        var chunkMetadata = Chunk.ReadMetadata(chunkReader);
 
-        SendAll(new AddPlayerPacket {
-            PlayerId = newPlayer.PlayerID,
-            Username = newPlayer.Username,
-            EntityId = newPlayer.EntityID,
-            Pos = newPlayer.Position,
-        });
+        for (var xz = 0; xz < 16 * 16; xz++)
+        {
+            var x = xz % 16;
+            var z = xz / 16;
 
+            var offset = chunkMetadata[x, z];
+            if (offset == 0)
+                continue;
 
-        ConnectionMap.Add(client, newPlayer);
-        return ConnectionMap[client];
-    }
+            chunksDat.Seek(offset, SeekOrigin.Begin);
+            world._chunks[x, z] = Chunk.From(chunkReader);
+        }
 
-    public void RemovePlayer(RakNetClient client, string reason) {
-        if (!ConnectionMap.TryGetValue(client, out var disconnectingPlayer))
-            return;
-
-        ConnectionMap.Remove(client);
-
-        SendAll(new RemovePlayerPacket {
-            EntityId = disconnectingPlayer.EntityID,
-            PlayerId = disconnectingPlayer.PlayerID,
-        });
-
-        SendAll(new ChatPacket {
-            Message = $"{disconnectingPlayer.Username} left the game. ({reason})"
-        });
-    }
-
-    public void MovePlayer(RakNetClient client, Vector3 position, Vector3 viewAngle) {
-        if (!ConnectionMap.TryGetValue(client, out var movingPlayer))
-            return;
-
-        movingPlayer.Position = position;
-        movingPlayer.ViewAngle = viewAngle;
-
-        SendAll(new MovePlayerPacket {
-            EntityId = movingPlayer.EntityID,
-            Pos = movingPlayer.Position,
-            Rot = movingPlayer.ViewAngle,
-        }, except: movingPlayer.PlayerID);
+        return world;
     }
 }
