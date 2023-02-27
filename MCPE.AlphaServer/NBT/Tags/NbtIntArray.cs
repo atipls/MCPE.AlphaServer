@@ -29,7 +29,7 @@ namespace MCPE.AlphaServer.NBT {
 
         /// <summary> Creates an unnamed NbtIntArray tag, containing an empty array of ints. </summary>
         public NbtIntArray()
-            : this((string) null) { }
+            : this((string)null) { }
 
 
         /// <summary> Creates an unnamed NbtIntArray tag, containing the given array of ints. </summary>
@@ -58,7 +58,7 @@ namespace MCPE.AlphaServer.NBT {
         public NbtIntArray([CanBeNull] string tagName, [NotNull] int[] value) {
             if (value == null) throw new ArgumentNullException(nameof(value));
             name = tagName;
-            ints = (int[]) value.Clone();
+            ints = (int[])value.Clone();
         }
 
 
@@ -69,7 +69,7 @@ namespace MCPE.AlphaServer.NBT {
         public NbtIntArray([NotNull] NbtIntArray other) {
             if (other == null) throw new ArgumentNullException(nameof(other));
             name = other.name;
-            ints = (int[]) other.Value.Clone();
+            ints = (int[])other.Value.Clone();
         }
 
 

@@ -193,7 +193,7 @@ namespace MCPE.AlphaServer.NBT {
 
                     // Read next tag, check if we've hit the end
                     if (canSeekStream) {
-                        TagStartOffset = (int) (reader.BaseStream.Position - streamStartOffset);
+                        TagStartOffset = (int)(reader.BaseStream.Position - streamStartOffset);
                     }
 
                     // set state to error in case reader.ReadTagType throws.
@@ -207,12 +207,10 @@ namespace MCPE.AlphaServer.NBT {
                         if (SkipEndTags) {
                             TagsRead--;
                             goto case NbtParseState.AtCompoundEnd;
-                        }
-                        else {
+                        } else {
                             return true;
                         }
-                    }
-                    else {
+                    } else {
                         ReadTagHeader(true);
                         return true;
                     }
@@ -237,19 +235,16 @@ namespace MCPE.AlphaServer.NBT {
                             state = NbtParseState.InList;
                             TagType = NbtTagType.List;
                             goto case NbtParseState.InList;
-                        }
-                        else if (ParentTagType == NbtTagType.Compound) {
+                        } else if (ParentTagType == NbtTagType.Compound) {
                             state = NbtParseState.InCompound;
                             goto case NbtParseState.InCompound;
-                        }
-                        else {
+                        } else {
                             // This should not happen unless NbtReader is bugged
                             throw new NbtFormatException(InvalidParentTagError);
                         }
-                    }
-                    else {
+                    } else {
                         if (canSeekStream) {
-                            TagStartOffset = (int) (reader.BaseStream.Position - streamStartOffset);
+                            TagStartOffset = (int)(reader.BaseStream.Position - streamStartOffset);
                         }
 
                         state = NbtParseState.InList;
@@ -264,16 +259,13 @@ namespace MCPE.AlphaServer.NBT {
                         state = NbtParseState.InList;
                         TagType = NbtTagType.Compound;
                         goto case NbtParseState.InList;
-                    }
-                    else if (ParentTagType == NbtTagType.Compound) {
+                    } else if (ParentTagType == NbtTagType.Compound) {
                         state = NbtParseState.InCompound;
                         goto case NbtParseState.InCompound;
-                    }
-                    else if (ParentTagType == NbtTagType.Unknown) {
+                    } else if (ParentTagType == NbtTagType.Unknown) {
                         state = NbtParseState.AtStreamEnd;
                         return false;
-                    }
-                    else {
+                    } else {
                         // This should not happen unless NbtReader is bugged
                         state = NbtParseState.Error;
                         throw new NbtFormatException(InvalidParentTagError);
@@ -456,8 +448,7 @@ namespace MCPE.AlphaServer.NBT {
         public bool ReadToDescendant([CanBeNull] string tagName) {
             if (state == NbtParseState.Error) {
                 throw new InvalidReaderStateException(ErroneousStateError);
-            }
-            else if (state == NbtParseState.AtStreamEnd) {
+            } else if (state == NbtParseState.AtStreamEnd) {
                 return false;
             }
 
@@ -465,8 +456,7 @@ namespace MCPE.AlphaServer.NBT {
             while (ReadToFollowing()) {
                 if (Depth <= currentDepth) {
                     return false;
-                }
-                else if (TagName == tagName) {
+                } else if (TagName == tagName) {
                     return true;
                 }
             }
@@ -483,8 +473,7 @@ namespace MCPE.AlphaServer.NBT {
         public bool ReadToNextSibling() {
             if (state == NbtParseState.Error) {
                 throw new InvalidReaderStateException(ErroneousStateError);
-            }
-            else if (state == NbtParseState.AtStreamEnd) {
+            } else if (state == NbtParseState.AtStreamEnd) {
                 return false;
             }
 
@@ -492,8 +481,7 @@ namespace MCPE.AlphaServer.NBT {
             while (ReadToFollowing()) {
                 if (Depth == currentDepth) {
                     return true;
-                }
-                else if (Depth < currentDepth) {
+                } else if (Depth < currentDepth) {
                     return false;
                 }
             }
@@ -527,8 +515,7 @@ namespace MCPE.AlphaServer.NBT {
         public int Skip() {
             if (state == NbtParseState.Error) {
                 throw new InvalidReaderStateException(ErroneousStateError);
-            }
-            else if (state == NbtParseState.AtStreamEnd) {
+            } else if (state == NbtParseState.AtStreamEnd) {
                 return 0;
             }
 
@@ -570,17 +557,14 @@ namespace MCPE.AlphaServer.NBT {
             NbtTag parent;
             if (TagType == NbtTagType.Compound) {
                 parent = new NbtCompound(TagName);
-            }
-            else if (TagType == NbtTagType.List) {
+            } else if (TagType == NbtTagType.List) {
                 parent = new NbtList(TagName, ListType);
-            }
-            else if (atValue) {
+            } else if (atValue) {
                 NbtTag result = ReadValueAsTag();
                 ReadToFollowing();
                 // if we're at a value tag, there are no child tags to read
                 return result;
-            }
-            else {
+            } else {
                 // end tags cannot be read-as-tags (there is no corresponding NbtTag object)
                 throw new InvalidOperationException(NoValueToReadError);
             }
@@ -604,14 +588,12 @@ namespace MCPE.AlphaServer.NBT {
                     AddToParent(thisTag, parent);
                     parent = thisTag;
                     parentDepth = Depth;
-                }
-                else if (TagType == NbtTagType.List) {
+                } else if (TagType == NbtTagType.List) {
                     thisTag = new NbtList(TagName, ListType);
                     AddToParent(thisTag, parent);
                     parent = thisTag;
                     parentDepth = Depth;
-                }
-                else if (TagType != NbtTagType.End) {
+                } else if (TagType != NbtTagType.End) {
                     thisTag = ReadValueAsTag();
                     AddToParent(thisTag, parent);
                 }
@@ -624,11 +606,9 @@ namespace MCPE.AlphaServer.NBT {
         void AddToParent([NotNull] NbtTag thisTag, [NotNull] NbtTag parent) {
             if (parent is NbtList parentAsList) {
                 parentAsList.Add(thisTag);
-            }
-            else if (parent is NbtCompound parentAsCompound) {
+            } else if (parent is NbtCompound parentAsCompound) {
                 parentAsCompound.Add(thisTag);
-            }
-            else {
+            } else {
                 // cannot happen unless NbtReader is bugged
                 throw new NbtFormatException(InvalidParentTagError);
             }
@@ -705,7 +685,7 @@ namespace MCPE.AlphaServer.NBT {
         /// <exception cref="InvalidReaderStateException"> If NbtReader cannot recover from a previous parsing error. </exception>
         /// <exception cref="InvalidCastException"> Tag value cannot be converted to the requested type. </exception>
         public T ReadValueAs<T>() {
-            return (T) ReadValue();
+            return (T)ReadValue();
         }
 
 
@@ -726,12 +706,10 @@ namespace MCPE.AlphaServer.NBT {
                 if (cacheTagValues) {
                     if (valueCache == null) {
                         throw new InvalidOperationException("No value to read.");
-                    }
-                    else {
+                    } else {
                         return valueCache;
                     }
-                }
-                else {
+                } else {
                     throw new InvalidOperationException(NoValueToReadError);
                 }
             }
@@ -840,7 +818,7 @@ namespace MCPE.AlphaServer.NBT {
             if (ListType == NbtTagType.Byte && typeof(T) == typeof(byte)) {
                 TagsRead += elementsToRead;
                 ListIndex = ParentTagLength - 1;
-                T[] val = (T[]) (object) reader.ReadBytes(elementsToRead);
+                T[] val = (T[])(object)reader.ReadBytes(elementsToRead);
                 if (val.Length < elementsToRead) {
                     throw new EndOfStreamException();
                 }
@@ -853,49 +831,49 @@ namespace MCPE.AlphaServer.NBT {
             switch (ListType) {
                 case NbtTagType.Byte:
                     for (int i = 0; i < elementsToRead; i++) {
-                        result[i] = (T) Convert.ChangeType(reader.ReadByte(), typeof(T));
+                        result[i] = (T)Convert.ChangeType(reader.ReadByte(), typeof(T));
                     }
 
                     break;
 
                 case NbtTagType.Short:
                     for (int i = 0; i < elementsToRead; i++) {
-                        result[i] = (T) Convert.ChangeType(reader.ReadInt16(), typeof(T));
+                        result[i] = (T)Convert.ChangeType(reader.ReadInt16(), typeof(T));
                     }
 
                     break;
 
                 case NbtTagType.Int:
                     for (int i = 0; i < elementsToRead; i++) {
-                        result[i] = (T) Convert.ChangeType(reader.ReadInt32(), typeof(T));
+                        result[i] = (T)Convert.ChangeType(reader.ReadInt32(), typeof(T));
                     }
 
                     break;
 
                 case NbtTagType.Long:
                     for (int i = 0; i < elementsToRead; i++) {
-                        result[i] = (T) Convert.ChangeType(reader.ReadInt64(), typeof(T));
+                        result[i] = (T)Convert.ChangeType(reader.ReadInt64(), typeof(T));
                     }
 
                     break;
 
                 case NbtTagType.Float:
                     for (int i = 0; i < elementsToRead; i++) {
-                        result[i] = (T) Convert.ChangeType(reader.ReadSingle(), typeof(T));
+                        result[i] = (T)Convert.ChangeType(reader.ReadSingle(), typeof(T));
                     }
 
                     break;
 
                 case NbtTagType.Double:
                     for (int i = 0; i < elementsToRead; i++) {
-                        result[i] = (T) Convert.ChangeType(reader.ReadDouble(), typeof(T));
+                        result[i] = (T)Convert.ChangeType(reader.ReadDouble(), typeof(T));
                     }
 
                     break;
 
                 case NbtTagType.String:
                     for (int i = 0; i < elementsToRead; i++) {
-                        result[i] = (T) Convert.ChangeType(reader.ReadString(), typeof(T));
+                        result[i] = (T)Convert.ChangeType(reader.ReadString(), typeof(T));
                     }
 
                     break;

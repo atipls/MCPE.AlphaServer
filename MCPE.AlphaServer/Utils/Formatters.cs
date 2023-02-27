@@ -9,7 +9,7 @@ namespace MCPE.AlphaServer.Utils;
 internal class Formatters {
     public static string AsHex(ReadOnlySpan<byte> data) {
         static byte[] ReplaceInvalid(IEnumerable<byte> characters) {
-            return characters.Select(c => c is < 31 or >= 127 ? (byte) '.' : c).ToArray();
+            return characters.Select(c => c is < 31 or >= 127 ? (byte)'.' : c).ToArray();
         }
 
         var result = new StringBuilder();

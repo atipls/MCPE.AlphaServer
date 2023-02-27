@@ -43,20 +43,19 @@ public class GameServer : IConnectionHandler {
         if (handlerMethod == null)
             Logger.Warn($"Handler not implemented for {packetName}. Bug?");
 
-        handlerMethod?.Invoke(this, new object[] {client, packet});
+        handlerMethod?.Invoke(this, new object[] { client, packet });
     }
 
     public void OnUpdate() { }
 
     public virtual void HandleLoginRequest(RakNetClient client, LoginRequestPacket packet) {
-
         var responseStatus = LoginResponsePacket.StatusFor(packet.Protocol1, packet.Protocol2, PROTOCOL);
         var shouldRejectLogin = BadUsernames.Contains(packet.Username.ToLower())
-            || ServerWorld.GetByName(packet.Username) != null; // Already logged in.
+                                || ServerWorld.GetByName(packet.Username) != null; // Already logged in.
 
         if (shouldRejectLogin) responseStatus = LoginResponsePacket.LoginStatus.ClientOutdated;
 
-        client.Send(new LoginResponsePacket {Status = responseStatus});
+        client.Send(new LoginResponsePacket { Status = responseStatus });
 
         if (responseStatus != LoginResponsePacket.LoginStatus.VersionsMatch)
             return;
@@ -64,11 +63,12 @@ public class GameServer : IConnectionHandler {
         // We can log in, start the game.
         var newPlayer = ServerWorld.AddPlayer(client, packet.ClientId, packet.Username);
         client.Send(new StartGamePacket {
-            Seed = 1,
-            Pos = newPlayer.Position,
-            EntityId = newPlayer.EntityID,
-            Gamemode = 0,
-        });
+                Seed = 1,
+                Pos = newPlayer.Position,
+                EntityId = newPlayer.EntityID,
+                Gamemode = 0,
+            }
+        );
     }
 
     public virtual void HandleReady(RakNetClient client, ReadyPacket packet) {
@@ -79,26 +79,29 @@ public class GameServer : IConnectionHandler {
                 continue;
 
             client.Send(new AddPlayerPacket {
-                PlayerId = player.PlayerID,
-                Username = player.Username,
-                EntityId = player.EntityID,
-                Pos = player.Position,
-                Pitch = (byte) (player.ViewAngle.Y / 360.0f * 256.0f),
-                Yaw = (byte) (player.ViewAngle.X / 360.0f * 256.0f),
-            });
+                    PlayerId = player.PlayerID,
+                    Username = player.Username,
+                    EntityId = player.EntityID,
+                    Pos = player.Position,
+                    Pitch = (byte)(player.ViewAngle.Y / 360.0f * 256.0f),
+                    Yaw = (byte)(player.ViewAngle.X / 360.0f * 256.0f),
+                }
+            );
         }
 
         client.Send(new ContainerSetContentPacket {
-            WindowId = 0,
-            Items = new List<ItemInstance> {
-                new ItemInstance {ItemID = 5, Count = 10},
-            },
-            Hotbar = new List<int> {0},
-        });
+                WindowId = 0,
+                Items = new List<ItemInstance> {
+                    new ItemInstance { ItemID = 5, Count = 10 },
+                },
+                Hotbar = new List<int> { 0 },
+            }
+        );
 
         client.Send(new SetTimePacket {
-            Time = 333333,
-        });
+                Time = 333333,
+            }
+        );
 
         // TODO: SetTime, maybe other things?
     }
@@ -138,10 +141,10 @@ public class GameServer : IConnectionHandler {
     //public virtual void HandleSetEntityMotion(RakNetClient client, SetEntityMotionPacket packet) { }
     //public virtual void HandleSetRiding(RakNetClient client, SetRidingPacket packet) { }
 
-    public virtual void HandleSetHealth(RakNetClient client, SetHealthPacket packet) => ServerWorld.SendAll(
-        new SetHealthPacket {
-            Health = (sbyte) (packet.Health < -31 ? packet.Health + 64 : packet.Health),
-        });
+    public virtual void HandleSetHealth(RakNetClient client, SetHealthPacket packet) => ServerWorld.SendAll(new SetHealthPacket {
+            Health = (sbyte)(packet.Health < -31 ? packet.Health + 64 : packet.Health),
+        }
+    );
 
     //public virtual void HandleSetSpawnPosition(RakNetClient client, SetSpawnPositionPacket packet) { }
     public virtual void HandleAnimate(RakNetClient client, AnimatePacket packet) => ServerWorld.SendAll(packet);

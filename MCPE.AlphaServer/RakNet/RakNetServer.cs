@@ -13,7 +13,7 @@ public class RakNetServer {
     private readonly Dictionary<IPEndPoint, RakNetClient> Connections;
 
     public RakNetServer(int port) {
-        GUID = (ulong) Random.Shared.Next() & ((ulong) Random.Shared.Next() << 32);
+        GUID = (ulong)Random.Shared.Next() & ((ulong)Random.Shared.Next() << 32);
         IP = new IPEndPoint(IPAddress.Any, port);
         UDP = new UdpClient(IP);
         Connections = new Dictionary<IPEndPoint, RakNetClient>();
@@ -29,7 +29,7 @@ public class RakNetServer {
     private CancellationTokenSource TaskCancellationToken { get; }
     private DateTime StartedOn { get; } = DateTime.Now;
 
-    public ulong TimeSinceStart => (ulong) (DateTime.Now - StartedOn).TotalMilliseconds;
+    public ulong TimeSinceStart => (ulong)(DateTime.Now - StartedOn).TotalMilliseconds;
 
     public void Start(IConnectionHandler connectionHandler) {
         ConnectionHandler = connectionHandler;
@@ -101,11 +101,12 @@ public class RakNetServer {
 
     private void StartRepeatingTask(Func<Task> action, TimeSpan interval) {
         Task.Run(async () => {
-            while (!TaskCancellationToken.IsCancellationRequested) {
-                await action();
-                await Task.Delay(interval);
-            }
-        }, TaskCancellationToken.Token);
+                while (!TaskCancellationToken.IsCancellationRequested) {
+                    await action();
+                    await Task.Delay(interval);
+                }
+            }, TaskCancellationToken.Token
+        );
     }
 
     private async Task Send(IPEndPoint endPoint, UnconnectedPacket packet) {

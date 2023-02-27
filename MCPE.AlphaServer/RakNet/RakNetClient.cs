@@ -77,15 +77,17 @@ public class RakNetClient {
             switch (ConnectedPacket.Parse(ref reader)) {
                 case ConnectedPingPacket ping:
                     Send(new ConnectedPongPacket {
-                        TimeSinceStart = ping.TimeSinceStart,
-                        TimeSinceServerStart = 0,
-                    }, ConnectedPacket.RELIABLE);
+                            TimeSinceStart = ping.TimeSinceStart,
+                            TimeSinceServerStart = 0,
+                        }, ConnectedPacket.RELIABLE
+                    );
                     break;
                 case ConnectionRequestPacket:
                     Send(new ConnectionRequestAcceptedPacket {
-                        EndPoint = IP,
-                        TimeSinceStart = 0 // TODO: Fix.
-                    }, ConnectedPacket.RELIABLE);
+                            EndPoint = IP,
+                            TimeSinceStart = 0 // TODO: Fix.
+                        }, ConnectedPacket.RELIABLE
+                    );
                     break;
                 case NewIncomingConnectionPacket:
                     Status = ConnectionStatus.CONNECTED;
@@ -114,7 +116,7 @@ public class RakNetClient {
             ackWriter.Byte(UnconnectedPacket.IS_CONNECTED | UnconnectedPacket.IS_ACK);
 
             // TODO: Use the range feature from RakNet?
-            ackWriter.Short((short) NeedsACK.Count);
+            ackWriter.Short((short)NeedsACK.Count);
             foreach (var sequence in NeedsACK) {
                 ackWriter.Byte(1); // Min == max.
                 ackWriter.Triad(sequence);
@@ -135,8 +137,8 @@ public class RakNetClient {
             var packetWriter = new DataWriter();
             packet.Encode(ref packetWriter);
 
-            writer.Byte((byte) (packet.Reliability << 5));
-            writer.Short((short) (packetWriter.Length * 8));
+            writer.Byte((byte)(packet.Reliability << 5));
+            writer.Short((short)(packetWriter.Length * 8));
 
             switch (packet.Reliability) {
                 case ConnectedPacket.RELIABLE:
@@ -145,7 +147,7 @@ public class RakNetClient {
                 case ConnectedPacket.RELIABLE_ORDERED:
                     writer.Triad(packet.ReliableIndex);
                     writer.Triad(packet.OrderingIndex);
-                    writer.Byte((byte) packet.OrderingChannel);
+                    writer.Byte((byte)packet.OrderingChannel);
                     break;
             }
 

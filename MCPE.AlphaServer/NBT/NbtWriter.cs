@@ -39,7 +39,7 @@ namespace MCPE.AlphaServer.NBT {
         public NbtWriter([NotNull] Stream stream, [NotNull] string rootTagName, bool bigEndian) {
             if (rootTagName == null) throw new ArgumentNullException(nameof(rootTagName));
             writer = new NbtBinaryWriter(stream, bigEndian);
-            writer.Write((byte) NbtTagType.Compound);
+            writer.Write((byte)NbtTagType.Compound);
             writer.Write(rootTagName);
             parentType = NbtTagType.Compound;
         }
@@ -76,7 +76,7 @@ namespace MCPE.AlphaServer.NBT {
             EnforceConstraints(tagName, NbtTagType.Compound);
             GoDown(NbtTagType.Compound);
 
-            writer.Write((byte) NbtTagType.Compound);
+            writer.Write((byte)NbtTagType.Compound);
             writer.Write(tagName);
         }
 
@@ -115,7 +115,7 @@ namespace MCPE.AlphaServer.NBT {
             listType = elementType;
             listSize = size;
 
-            writer.Write((byte) elementType);
+            writer.Write((byte)elementType);
             writer.Write(size);
         }
 
@@ -142,9 +142,9 @@ namespace MCPE.AlphaServer.NBT {
             listType = elementType;
             listSize = size;
 
-            writer.Write((byte) NbtTagType.List);
+            writer.Write((byte)NbtTagType.List);
             writer.Write(tagName);
-            writer.Write((byte) elementType);
+            writer.Write((byte)elementType);
             writer.Write(size);
         }
 
@@ -155,10 +155,10 @@ namespace MCPE.AlphaServer.NBT {
         public void EndList() {
             if (parentType != NbtTagType.List || IsDone) {
                 throw new NbtFormatException("Not currently in a list.");
-            }
-            else if (listIndex < listSize) {
+            } else if (listIndex < listSize) {
                 throw new NbtFormatException("Cannot end list: not all list elements have been written yet. " +
-                                             "Expected: " + listSize + ", written: " + listIndex);
+                                             "Expected: " + listSize + ", written: " + listIndex
+                );
             }
 
             GoUp();
@@ -187,7 +187,7 @@ namespace MCPE.AlphaServer.NBT {
         /// an unnamed byte tag was expected -OR- a tag of a different type was expected. </exception>
         public void WriteByte([NotNull] string tagName, byte value) {
             EnforceConstraints(tagName, NbtTagType.Byte);
-            writer.Write((byte) NbtTagType.Byte);
+            writer.Write((byte)NbtTagType.Byte);
             writer.Write(tagName);
             writer.Write(value);
         }
@@ -211,7 +211,7 @@ namespace MCPE.AlphaServer.NBT {
         /// an unnamed byte tag was expected -OR- a tag of a different type was expected. </exception>
         public void WriteDouble([NotNull] string tagName, double value) {
             EnforceConstraints(tagName, NbtTagType.Double);
-            writer.Write((byte) NbtTagType.Double);
+            writer.Write((byte)NbtTagType.Double);
             writer.Write(tagName);
             writer.Write(value);
         }
@@ -235,7 +235,7 @@ namespace MCPE.AlphaServer.NBT {
         /// an unnamed float tag was expected -OR- a tag of a different type was expected. </exception>
         public void WriteFloat([NotNull] string tagName, float value) {
             EnforceConstraints(tagName, NbtTagType.Float);
-            writer.Write((byte) NbtTagType.Float);
+            writer.Write((byte)NbtTagType.Float);
             writer.Write(tagName);
             writer.Write(value);
         }
@@ -259,7 +259,7 @@ namespace MCPE.AlphaServer.NBT {
         /// an unnamed int tag was expected -OR- a tag of a different type was expected. </exception>
         public void WriteInt([NotNull] string tagName, int value) {
             EnforceConstraints(tagName, NbtTagType.Int);
-            writer.Write((byte) NbtTagType.Int);
+            writer.Write((byte)NbtTagType.Int);
             writer.Write(tagName);
             writer.Write(value);
         }
@@ -283,7 +283,7 @@ namespace MCPE.AlphaServer.NBT {
         /// an unnamed long tag was expected -OR- a tag of a different type was expected. </exception>
         public void WriteLong([NotNull] string tagName, long value) {
             EnforceConstraints(tagName, NbtTagType.Long);
-            writer.Write((byte) NbtTagType.Long);
+            writer.Write((byte)NbtTagType.Long);
             writer.Write(tagName);
             writer.Write(value);
         }
@@ -307,7 +307,7 @@ namespace MCPE.AlphaServer.NBT {
         /// an unnamed short tag was expected -OR- a tag of a different type was expected. </exception>
         public void WriteShort([NotNull] string tagName, short value) {
             EnforceConstraints(tagName, NbtTagType.Short);
-            writer.Write((byte) NbtTagType.Short);
+            writer.Write((byte)NbtTagType.Short);
             writer.Write(tagName);
             writer.Write(value);
         }
@@ -333,7 +333,7 @@ namespace MCPE.AlphaServer.NBT {
         public void WriteString([NotNull] string tagName, [NotNull] string value) {
             if (value == null) throw new ArgumentNullException(nameof(value));
             EnforceConstraints(tagName, NbtTagType.String);
-            writer.Write((byte) NbtTagType.String);
+            writer.Write((byte)NbtTagType.String);
             writer.Write(tagName);
             writer.Write(value);
         }
@@ -404,7 +404,7 @@ namespace MCPE.AlphaServer.NBT {
         public void WriteByteArray([NotNull] string tagName, [NotNull] byte[] data, int offset, int count) {
             CheckArray(data, offset, count);
             EnforceConstraints(tagName, NbtTagType.ByteArray);
-            writer.Write((byte) NbtTagType.ByteArray);
+            writer.Write((byte)NbtTagType.ByteArray);
             writer.Write(tagName);
             writer.Write(count);
             writer.Write(data, offset, count);
@@ -426,8 +426,7 @@ namespace MCPE.AlphaServer.NBT {
             if (dataSource == null) throw new ArgumentNullException(nameof(dataSource));
             if (!dataSource.CanRead) {
                 throw new ArgumentException("Given stream does not support reading.", nameof(dataSource));
-            }
-            else if (count < 0) {
+            } else if (count < 0) {
                 throw new ArgumentOutOfRangeException(nameof(count), "count may not be negative");
             }
 
@@ -453,13 +452,12 @@ namespace MCPE.AlphaServer.NBT {
             if (buffer == null) throw new ArgumentNullException(nameof(buffer));
             if (!dataSource.CanRead) {
                 throw new ArgumentException("Given stream does not support reading.", nameof(dataSource));
-            }
-            else if (count < 0) {
+            } else if (count < 0) {
                 throw new ArgumentOutOfRangeException(nameof(count), "count may not be negative");
-            }
-            else if (buffer.Length == 0 && count > 0) {
+            } else if (buffer.Length == 0 && count > 0) {
                 throw new ArgumentException("buffer size must be greater than 0 when count is greater than 0",
-                    nameof(buffer));
+                    nameof(buffer)
+                );
             }
 
             EnforceConstraints(null, NbtTagType.ByteArray);
@@ -507,17 +505,16 @@ namespace MCPE.AlphaServer.NBT {
             if (buffer == null) throw new ArgumentNullException(nameof(buffer));
             if (!dataSource.CanRead) {
                 throw new ArgumentException("Given stream does not support reading.", nameof(dataSource));
-            }
-            else if (count < 0) {
+            } else if (count < 0) {
                 throw new ArgumentOutOfRangeException(nameof(count), "count may not be negative");
-            }
-            else if (buffer.Length == 0 && count > 0) {
+            } else if (buffer.Length == 0 && count > 0) {
                 throw new ArgumentException("buffer size must be greater than 0 when count is greater than 0",
-                    nameof(buffer));
+                    nameof(buffer)
+                );
             }
 
             EnforceConstraints(tagName, NbtTagType.ByteArray);
-            writer.Write((byte) NbtTagType.ByteArray);
+            writer.Write((byte)NbtTagType.ByteArray);
             writer.Write(tagName);
             WriteByteArrayFromStreamImpl(dataSource, count, buffer);
         }
@@ -586,7 +583,7 @@ namespace MCPE.AlphaServer.NBT {
         public void WriteIntArray([NotNull] string tagName, [NotNull] int[] data, int offset, int count) {
             CheckArray(data, offset, count);
             EnforceConstraints(tagName, NbtTagType.IntArray);
-            writer.Write((byte) NbtTagType.IntArray);
+            writer.Write((byte)NbtTagType.IntArray);
             writer.Write(tagName);
             writer.Write(count);
             for (int i = offset; i < count; i++) {
@@ -657,7 +654,7 @@ namespace MCPE.AlphaServer.NBT {
         public void WriteLongArray([NotNull] string tagName, [NotNull] long[] data, int offset, int count) {
             CheckArray(data, offset, count);
             EnforceConstraints(tagName, NbtTagType.LongArray);
-            writer.Write((byte) NbtTagType.LongArray);
+            writer.Write((byte)NbtTagType.LongArray);
             writer.Write(tagName);
             writer.Write(count);
             for (int i = offset; i < count; i++) {
@@ -679,8 +676,7 @@ namespace MCPE.AlphaServer.NBT {
             EnforceConstraints(tag.Name, tag.TagType);
             if (tag.Name != null) {
                 tag.WriteTag(writer);
-            }
-            else {
+            } else {
                 tag.WriteData(writer);
             }
         }
@@ -720,8 +716,7 @@ namespace MCPE.AlphaServer.NBT {
         void GoUp() {
             if (nodes == null || nodes.Count == 0) {
                 IsDone = true;
-            }
-            else {
+            } else {
                 NbtWriterNode oldNode = nodes.Pop();
                 parentType = oldNode.ParentType;
                 listType = oldNode.ListType;
@@ -739,18 +734,16 @@ namespace MCPE.AlphaServer.NBT {
             if (parentType == NbtTagType.List) {
                 if (name != null) {
                     throw new NbtFormatException("Expecting an unnamed tag.");
-                }
-                else if (listType != desiredType) {
+                } else if (listType != desiredType) {
                     throw new NbtFormatException("Unexpected tag type (expected: " + listType + ", given: " +
-                                                 desiredType);
-                }
-                else if (listIndex >= listSize) {
+                                                 desiredType
+                    );
+                } else if (listIndex >= listSize) {
                     throw new NbtFormatException("Given list size exceeded.");
                 }
 
                 listIndex++;
-            }
-            else if (name == null) {
+            } else if (name == null) {
                 throw new NbtFormatException("Expecting a named tag.");
             }
         }
@@ -759,14 +752,11 @@ namespace MCPE.AlphaServer.NBT {
         static void CheckArray([NotNull] Array data, int offset, int count) {
             if (data == null) {
                 throw new ArgumentNullException(nameof(data));
-            }
-            else if (offset < 0) {
+            } else if (offset < 0) {
                 throw new ArgumentOutOfRangeException(nameof(offset), "offset may not be negative.");
-            }
-            else if (count < 0) {
+            } else if (count < 0) {
                 throw new ArgumentOutOfRangeException(nameof(count), "count may not be negative.");
-            }
-            else if ((data.Length - offset) < count) {
+            } else if ((data.Length - offset) < count) {
                 throw new ArgumentException("count may not be greater than offset subtracted from the array length.");
             }
         }

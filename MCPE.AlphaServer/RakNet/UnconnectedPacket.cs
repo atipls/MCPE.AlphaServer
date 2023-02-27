@@ -22,18 +22,18 @@ internal abstract class UnconnectedPacket {
     public const int NEEDS_B_AS = 1 << 2;
 
     public static readonly byte[] RakNetMagic =
-        {0x00, 0xFF, 0xFF, 0x00, 0xFE, 0xFE, 0xFE, 0xFE, 0xFD, 0xFD, 0xFD, 0xFD, 0x12, 0x34, 0x56, 0x78};
+        { 0x00, 0xFF, 0xFF, 0x00, 0xFE, 0xFE, 0xFE, 0xFE, 0xFD, 0xFD, 0xFD, 0xFD, 0x12, 0x34, 0x56, 0x78 };
 
     protected UnconnectedPacketType Type { get; set; }
 
-    protected virtual void Decode(ref DataReader reader) => Type = (UnconnectedPacketType) reader.Byte();
-    public virtual void Encode(ref DataWriter writer) => writer.Byte((byte) Type);
+    protected virtual void Decode(ref DataReader reader) => Type = (UnconnectedPacketType)reader.Byte();
+    public virtual void Encode(ref DataWriter writer) => writer.Byte((byte)Type);
 
     public static UnconnectedPacket Parse(byte[] data) {
         var reader = new DataReader(data);
         var type = data[0];
 
-        UnconnectedPacket packet = (UnconnectedPacketType) type switch {
+        UnconnectedPacket packet = (UnconnectedPacketType)type switch {
             UnconnectedPacketType.UnconnectedPing => new UnconnectedPingPacket(),
             UnconnectedPacketType.UnconnectedPong => new UnconnectedPongPacket(),
             UnconnectedPacketType.OpenConnectionRequest1 => new OpenConnectionRequest1Packet(),
@@ -202,7 +202,7 @@ internal class OpenConnectionReply1Packet : UnconnectedPacket {
     public OpenConnectionReply1Packet(ulong serverID, bool useEncryption, ushort mtuSize) {
         Type = UnconnectedPacketType.OpenConnectionReply1;
         ServerID = serverID;
-        UseEncryption = (byte) (useEncryption ? 0x01 : 0x00);
+        UseEncryption = (byte)(useEncryption ? 0x01 : 0x00);
         MtuSize = mtuSize;
     }
 
@@ -247,7 +247,7 @@ internal class OpenConnectionReply2Packet : UnconnectedPacket {
         ServerID = serverID;
         ClientAddress = clientAddress;
         MtuSize = mtuSize;
-        UseEncryption = (byte) (useEncryption ? 0x01 : 0x00);
+        UseEncryption = (byte)(useEncryption ? 0x01 : 0x00);
     }
 
     protected override void Decode(ref DataReader reader) {

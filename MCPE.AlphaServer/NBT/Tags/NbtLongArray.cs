@@ -28,7 +28,7 @@ namespace MCPE.AlphaServer.NBT {
 
         /// <summary> Creates an unnamed NbtLongArray tag, containing an empty array of longs. </summary>
         public NbtLongArray()
-            : this((string) null) { }
+            : this((string)null) { }
 
         /// <summary> Creates an unnamed NbtLongArray tag, containing the given array of longs. </summary>
         /// <param name="value"> Long array to assign to this tag's Value. May not be <c>null</c>. </param>
@@ -54,7 +54,7 @@ namespace MCPE.AlphaServer.NBT {
         public NbtLongArray([CanBeNull] string tagName, [NotNull] long[] value) {
             if (value == null) throw new ArgumentNullException(nameof(value));
             name = tagName;
-            longs = (long[]) value.Clone();
+            longs = (long[])value.Clone();
         }
 
 
@@ -68,7 +68,7 @@ namespace MCPE.AlphaServer.NBT {
             }
 
             name = other.name;
-            longs = (long[]) other.longs.Clone();
+            longs = (long[])other.longs.Clone();
         }
 
 

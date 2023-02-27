@@ -31,7 +31,7 @@ public class DataReader {
         return memory;
     }
 
-    public byte Byte() => (byte) stream.ReadByte();
+    public byte Byte() => (byte)stream.ReadByte();
 
     public short Short() => BinaryPrimitives.ReadInt16BigEndian(Get<short>());
     public ushort UShort() => BinaryPrimitives.ReadUInt16BigEndian(Get<short>());

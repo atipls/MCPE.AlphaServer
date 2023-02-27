@@ -25,8 +25,7 @@ namespace MCPE.AlphaServer.NBT {
                     if (tags.Count > 0) {
                         throw new ArgumentException("Only empty list tags may have TagType of End.");
                     }
-                }
-                else if (value < NbtTagType.Byte || (value > NbtTagType.LongArray && value != NbtTagType.Unknown)) {
+                } else if (value < NbtTagType.Byte || (value > NbtTagType.LongArray && value != NbtTagType.Unknown)) {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
@@ -35,7 +34,8 @@ namespace MCPE.AlphaServer.NBT {
                     // We can safely assume that ALL tags have the same TagType as the first tag.
                     if (actualType != value) {
                         string msg = String.Format("Given NbtTagType ({0}) does not match actual element type ({1})",
-                            value, actualType);
+                            value, actualType
+                        );
                         throw new ArgumentException(msg);
                     }
                 }
@@ -144,7 +144,7 @@ namespace MCPE.AlphaServer.NBT {
             name = other.name;
             listType = other.listType;
             foreach (NbtTag tag in other.tags) {
-                tags.Add((NbtTag) tag.Clone());
+                tags.Add((NbtTag)tag.Clone());
             }
         }
 
@@ -161,14 +161,11 @@ namespace MCPE.AlphaServer.NBT {
             set {
                 if (value == null) {
                     throw new ArgumentNullException(nameof(value));
-                }
-                else if (value.Parent != null) {
+                } else if (value.Parent != null) {
                     throw new ArgumentException("A tag may only be added to one compound/list at a time.");
-                }
-                else if (value == this || value == Parent) {
+                } else if (value == this || value == Parent) {
                     throw new ArgumentException("A list tag may not be added to itself or to its child tag.");
-                }
-                else if (value.Name != null) {
+                } else if (value.Name != null) {
                     throw new ArgumentException("Named tag given. A list may only contain unnamed tags.");
                 }
 
@@ -191,7 +188,7 @@ namespace MCPE.AlphaServer.NBT {
         [NotNull]
         [Pure]
         public T Get<T>(int tagIndex) where T : NbtTag {
-            return (T) tags[tagIndex];
+            return (T)tags[tagIndex];
         }
 
 
@@ -227,7 +224,7 @@ namespace MCPE.AlphaServer.NBT {
         public T[] ToArray<T>() where T : NbtTag {
             var result = new T[tags.Count];
             for (int i = 0; i < result.Length; i++) {
-                result[i] = (T) tags[i];
+                result[i] = (T)tags[i];
             }
 
             return result;
@@ -419,8 +416,7 @@ namespace MCPE.AlphaServer.NBT {
 
             if (listType != NbtTagType.Unknown && newTag.TagType != listType) {
                 throw new ArgumentException("Items must be of type " + listType);
-            }
-            else if (newTag.Parent != null) {
+            } else if (newTag.Parent != null) {
                 throw new ArgumentException("A tag may only be added to one compound/list at a time.");
             }
 
@@ -450,20 +446,18 @@ namespace MCPE.AlphaServer.NBT {
         public void Add([NotNull] NbtTag newTag) {
             if (newTag == null) {
                 throw new ArgumentNullException(nameof(newTag));
-            }
-            else if (newTag.Parent != null) {
+            } else if (newTag.Parent != null) {
                 throw new ArgumentException("A tag may only be added to one compound/list at a time.");
-            }
-            else if (newTag == this || newTag == Parent) {
+            } else if (newTag == this || newTag == Parent) {
                 throw new ArgumentException("A list tag may not be added to itself or to its child tag.");
-            }
-            else if (newTag.Name != null) {
+            } else if (newTag.Name != null) {
                 throw new ArgumentException("Named tag given. A list may only contain unnamed tags.");
             }
 
             if (listType != NbtTagType.Unknown && newTag.TagType != listType) {
                 throw new ArgumentException("Items in this list must be of type " + listType + ". Given type: " +
-                                            newTag.TagType);
+                                            newTag.TagType
+                );
             }
 
             tags.Add(newTag);
@@ -539,35 +533,35 @@ namespace MCPE.AlphaServer.NBT {
         #region Implementation of IList and ICollection
 
         void IList.Remove([NotNull] object value) {
-            Remove((NbtTag) value);
+            Remove((NbtTag)value);
         }
 
 
         [NotNull]
         object IList.this[int tagIndex] {
             get { return tags[tagIndex]; }
-            set { this[tagIndex] = (NbtTag) value; }
+            set { this[tagIndex] = (NbtTag)value; }
         }
 
 
         int IList.Add([NotNull] object value) {
-            Add((NbtTag) value);
+            Add((NbtTag)value);
             return (tags.Count - 1);
         }
 
 
         bool IList.Contains([NotNull] object value) {
-            return tags.Contains((NbtTag) value);
+            return tags.Contains((NbtTag)value);
         }
 
 
         int IList.IndexOf([NotNull] object value) {
-            return tags.IndexOf((NbtTag) value);
+            return tags.IndexOf((NbtTag)value);
         }
 
 
         void IList.Insert(int index, [NotNull] object value) {
-            Insert(index, (NbtTag) value);
+            Insert(index, (NbtTag)value);
         }
 
 
@@ -577,7 +571,7 @@ namespace MCPE.AlphaServer.NBT {
 
 
         void ICollection.CopyTo(Array array, int index) {
-            CopyTo((NbtTag[]) array, index);
+            CopyTo((NbtTag[])array, index);
         }
 
 

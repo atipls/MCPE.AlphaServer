@@ -56,7 +56,7 @@ namespace MCPE.AlphaServer.NBT {
             if (other == null) throw new ArgumentNullException(nameof(other));
             name = other.name;
             foreach (NbtTag tag in other.tags.Values) {
-                Add((NbtTag) tag.Clone());
+                Add((NbtTag)tag.Clone());
             }
         }
 
@@ -72,17 +72,13 @@ namespace MCPE.AlphaServer.NBT {
             set {
                 if (tagName == null) {
                     throw new ArgumentNullException(nameof(tagName));
-                }
-                else if (value == null) {
+                } else if (value == null) {
                     throw new ArgumentNullException(nameof(value));
-                }
-                else if (value.Name != tagName) {
+                } else if (value.Name != tagName) {
                     throw new ArgumentException("Given tag name must match tag's actual name.");
-                }
-                else if (value.Parent != null) {
+                } else if (value.Parent != null) {
                     throw new ArgumentException("A tag may only be added to one compound/list at a time.");
-                }
-                else if (value == this) {
+                } else if (value == this) {
                     throw new ArgumentException("Cannot add tag to itself");
                 }
 
@@ -103,7 +99,7 @@ namespace MCPE.AlphaServer.NBT {
             if (tagName == null) throw new ArgumentNullException(nameof(tagName));
             NbtTag result;
             if (tags.TryGetValue(tagName, out result)) {
-                return (T) result;
+                return (T)result;
             }
 
             return null;
@@ -139,10 +135,9 @@ namespace MCPE.AlphaServer.NBT {
             if (tagName == null) throw new ArgumentNullException(nameof(tagName));
             NbtTag tempResult;
             if (tags.TryGetValue(tagName, out tempResult)) {
-                result = (T) tempResult;
+                result = (T)tempResult;
                 return true;
-            }
-            else {
+            } else {
                 result = null;
                 return false;
             }
@@ -162,8 +157,7 @@ namespace MCPE.AlphaServer.NBT {
             if (tags.TryGetValue(tagName, out tempResult)) {
                 result = tempResult;
                 return true;
-            }
-            else {
+            } else {
                 result = null;
                 return false;
             }
@@ -432,14 +426,11 @@ namespace MCPE.AlphaServer.NBT {
         public void Add([NotNull] NbtTag newTag) {
             if (newTag == null) {
                 throw new ArgumentNullException(nameof(newTag));
-            }
-            else if (newTag == this) {
+            } else if (newTag == this) {
                 throw new ArgumentException("Cannot add tag to self");
-            }
-            else if (newTag.Name == null) {
+            } else if (newTag.Name == null) {
                 throw new ArgumentException("Only named tags are allowed in compound tags.");
-            }
-            else if (newTag.Parent != null) {
+            } else if (newTag.Parent != null) {
                 throw new ArgumentException("A tag may only be added to one compound/list at a time.");
             }
 
@@ -522,7 +513,7 @@ namespace MCPE.AlphaServer.NBT {
         #region Implementation of ICollection
 
         void ICollection.CopyTo(Array array, int index) {
-            CopyTo((NbtTag[]) array, index);
+            CopyTo((NbtTag[])array, index);
         }
 
 

@@ -52,19 +52,18 @@ namespace MCPE.AlphaServer.NBT {
 
 
         public void Write(NbtTagType value) {
-            stream.WriteByte((byte) value);
+            stream.WriteByte((byte)value);
         }
 
 
         public void Write(short value) {
             unchecked {
                 if (swapNeeded) {
-                    buffer[0] = (byte) (value >> 8);
-                    buffer[1] = (byte) value;
-                }
-                else {
-                    buffer[0] = (byte) value;
-                    buffer[1] = (byte) (value >> 8);
+                    buffer[0] = (byte)(value >> 8);
+                    buffer[1] = (byte)value;
+                } else {
+                    buffer[0] = (byte)value;
+                    buffer[1] = (byte)(value >> 8);
                 }
             }
 
@@ -75,16 +74,15 @@ namespace MCPE.AlphaServer.NBT {
         public void Write(int value) {
             unchecked {
                 if (swapNeeded) {
-                    buffer[0] = (byte) (value >> 24);
-                    buffer[1] = (byte) (value >> 16);
-                    buffer[2] = (byte) (value >> 8);
-                    buffer[3] = (byte) value;
-                }
-                else {
-                    buffer[0] = (byte) value;
-                    buffer[1] = (byte) (value >> 8);
-                    buffer[2] = (byte) (value >> 16);
-                    buffer[3] = (byte) (value >> 24);
+                    buffer[0] = (byte)(value >> 24);
+                    buffer[1] = (byte)(value >> 16);
+                    buffer[2] = (byte)(value >> 8);
+                    buffer[3] = (byte)value;
+                } else {
+                    buffer[0] = (byte)value;
+                    buffer[1] = (byte)(value >> 8);
+                    buffer[2] = (byte)(value >> 16);
+                    buffer[3] = (byte)(value >> 24);
                 }
             }
 
@@ -95,24 +93,23 @@ namespace MCPE.AlphaServer.NBT {
         public void Write(long value) {
             unchecked {
                 if (swapNeeded) {
-                    buffer[0] = (byte) (value >> 56);
-                    buffer[1] = (byte) (value >> 48);
-                    buffer[2] = (byte) (value >> 40);
-                    buffer[3] = (byte) (value >> 32);
-                    buffer[4] = (byte) (value >> 24);
-                    buffer[5] = (byte) (value >> 16);
-                    buffer[6] = (byte) (value >> 8);
-                    buffer[7] = (byte) value;
-                }
-                else {
-                    buffer[0] = (byte) value;
-                    buffer[1] = (byte) (value >> 8);
-                    buffer[2] = (byte) (value >> 16);
-                    buffer[3] = (byte) (value >> 24);
-                    buffer[4] = (byte) (value >> 32);
-                    buffer[5] = (byte) (value >> 40);
-                    buffer[6] = (byte) (value >> 48);
-                    buffer[7] = (byte) (value >> 56);
+                    buffer[0] = (byte)(value >> 56);
+                    buffer[1] = (byte)(value >> 48);
+                    buffer[2] = (byte)(value >> 40);
+                    buffer[3] = (byte)(value >> 32);
+                    buffer[4] = (byte)(value >> 24);
+                    buffer[5] = (byte)(value >> 16);
+                    buffer[6] = (byte)(value >> 8);
+                    buffer[7] = (byte)value;
+                } else {
+                    buffer[0] = (byte)value;
+                    buffer[1] = (byte)(value >> 8);
+                    buffer[2] = (byte)(value >> 16);
+                    buffer[3] = (byte)(value >> 24);
+                    buffer[4] = (byte)(value >> 32);
+                    buffer[5] = (byte)(value >> 40);
+                    buffer[6] = (byte)(value >> 48);
+                    buffer[7] = (byte)(value >> 56);
                 }
             }
 
@@ -121,19 +118,18 @@ namespace MCPE.AlphaServer.NBT {
 
 
         public void Write(float value) {
-            ulong tmpValue = *(uint*) &value;
+            ulong tmpValue = *(uint*)&value;
             unchecked {
                 if (swapNeeded) {
-                    buffer[0] = (byte) (tmpValue >> 24);
-                    buffer[1] = (byte) (tmpValue >> 16);
-                    buffer[2] = (byte) (tmpValue >> 8);
-                    buffer[3] = (byte) tmpValue;
-                }
-                else {
-                    buffer[0] = (byte) tmpValue;
-                    buffer[1] = (byte) (tmpValue >> 8);
-                    buffer[2] = (byte) (tmpValue >> 16);
-                    buffer[3] = (byte) (tmpValue >> 24);
+                    buffer[0] = (byte)(tmpValue >> 24);
+                    buffer[1] = (byte)(tmpValue >> 16);
+                    buffer[2] = (byte)(tmpValue >> 8);
+                    buffer[3] = (byte)tmpValue;
+                } else {
+                    buffer[0] = (byte)tmpValue;
+                    buffer[1] = (byte)(tmpValue >> 8);
+                    buffer[2] = (byte)(tmpValue >> 16);
+                    buffer[3] = (byte)(tmpValue >> 24);
                 }
             }
 
@@ -142,27 +138,26 @@ namespace MCPE.AlphaServer.NBT {
 
 
         public void Write(double value) {
-            ulong tmpValue = *(ulong*) &value;
+            ulong tmpValue = *(ulong*)&value;
             unchecked {
                 if (swapNeeded) {
-                    buffer[0] = (byte) (tmpValue >> 56);
-                    buffer[1] = (byte) (tmpValue >> 48);
-                    buffer[2] = (byte) (tmpValue >> 40);
-                    buffer[3] = (byte) (tmpValue >> 32);
-                    buffer[4] = (byte) (tmpValue >> 24);
-                    buffer[5] = (byte) (tmpValue >> 16);
-                    buffer[6] = (byte) (tmpValue >> 8);
-                    buffer[7] = (byte) tmpValue;
-                }
-                else {
-                    buffer[0] = (byte) tmpValue;
-                    buffer[1] = (byte) (tmpValue >> 8);
-                    buffer[2] = (byte) (tmpValue >> 16);
-                    buffer[3] = (byte) (tmpValue >> 24);
-                    buffer[4] = (byte) (tmpValue >> 32);
-                    buffer[5] = (byte) (tmpValue >> 40);
-                    buffer[6] = (byte) (tmpValue >> 48);
-                    buffer[7] = (byte) (tmpValue >> 56);
+                    buffer[0] = (byte)(tmpValue >> 56);
+                    buffer[1] = (byte)(tmpValue >> 48);
+                    buffer[2] = (byte)(tmpValue >> 40);
+                    buffer[3] = (byte)(tmpValue >> 32);
+                    buffer[4] = (byte)(tmpValue >> 24);
+                    buffer[5] = (byte)(tmpValue >> 16);
+                    buffer[6] = (byte)(tmpValue >> 8);
+                    buffer[7] = (byte)tmpValue;
+                } else {
+                    buffer[0] = (byte)tmpValue;
+                    buffer[1] = (byte)(tmpValue >> 8);
+                    buffer[2] = (byte)(tmpValue >> 16);
+                    buffer[3] = (byte)(tmpValue >> 24);
+                    buffer[4] = (byte)(tmpValue >> 32);
+                    buffer[5] = (byte)(tmpValue >> 40);
+                    buffer[6] = (byte)(tmpValue >> 48);
+                    buffer[7] = (byte)(tmpValue >> 56);
                 }
             }
 
@@ -178,14 +173,13 @@ namespace MCPE.AlphaServer.NBT {
 
             // Write out string length (as number of bytes)
             int numBytes = Encoding.GetByteCount(value);
-            Write((short) numBytes);
+            Write((short)numBytes);
 
             if (numBytes <= BufferSize) {
                 // If the string fits entirely in the buffer, encode and write it as one
                 Encoding.GetBytes(value, 0, value.Length, buffer, 0);
                 stream.Write(buffer, 0, numBytes);
-            }
-            else {
+            } else {
                 // Aggressively try to not allocate memory in this loop for runtime performance reasons.
                 // Use an Encoder to write out the string correctly (handling surrogates crossing buffer
                 // boundaries properly).  
@@ -198,7 +192,8 @@ namespace MCPE.AlphaServer.NBT {
                     fixed (char* pChars = value) {
                         fixed (byte* pBytes = buffer) {
                             byteLen = encoder.GetBytes(pChars + charStart, charCount, pBytes, BufferSize,
-                                charCount == numLeft);
+                                charCount == numLeft
+                            );
                         }
                     }
 
