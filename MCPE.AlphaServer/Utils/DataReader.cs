@@ -25,8 +25,8 @@ public class DataReader {
     }
 
     public Memory<byte> Read(int length) {
-        var memory = new byte[length];
-        if (stream.Read(memory) != length)
+        Memory<byte> memory = new byte[length];
+        if (stream.Read(memory.Span) != length)
             throw new EndOfStreamException();
         return memory;
     }
@@ -44,6 +44,8 @@ public class DataReader {
 
     public float Float() => BitConverter.UInt32BitsToSingle(UInt());
     public double Double() => BitConverter.UInt64BitsToDouble(ULong());
+
+    public Memory<byte> Remaining() => Read((int)(stream.Length - stream.Position));
 
     public string String() {
         var length = UShort();

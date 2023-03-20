@@ -11,14 +11,11 @@ public class Player : Entity {
     public Vector3 Position = new(100.0f, 70.0f, 100.0f);
     public Vector3 ViewAngle = new();
 
-    public const int SYNC_IS_SLEEPING = 16;
-    public const int SYNC_SLEEP_POSITION = 17;
-
     public Player(RakNetClient client) {
         Client = client;
 
-        Define(SYNC_IS_SLEEPING, EntityDataType.Byte);
-        Define(SYNC_SLEEP_POSITION, EntityDataType.Pos);
+        Define(EntityDataKey.IsSleeping, EntityDataType.Byte);
+        Define(EntityDataKey.SleepPosition, EntityDataType.Pos);
     }
 
     public bool IsClientOf(RakNetClient client) => client.ClientID == Client.ClientID;

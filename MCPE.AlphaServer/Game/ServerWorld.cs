@@ -10,10 +10,12 @@ public class ServerWorld {
     private readonly Dictionary<RakNetClient, Player> ConnectionMap = new();
 
     public List<Entity> Entities = new();
+    public World World;
     private GameServer Server;
 
-    public ServerWorld(GameServer server) {
+    public ServerWorld(GameServer server, World world) {
         Server = server;
+        World = world;
     }
 
     public IEnumerable<Player> Players => ConnectionMap.Values;

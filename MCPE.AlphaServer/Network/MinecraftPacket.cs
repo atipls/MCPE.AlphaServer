@@ -175,7 +175,11 @@ public class AddPlayerPacket : MinecraftPacket {
     public ushort ItemId;
     public ushort ItemAuxValue;
 
-    public byte[] Metadata = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }; // TEMPORARY
+    public byte[] Metadata = {
+        0x00, 0x00, 0x21, 0x2c, 0x01, 0x10, 0x00, 0xd1,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x7f
+    };
 
     public override void Decode(ref DataReader reader) {
         reader.Byte(); // Packet type.
@@ -187,6 +191,7 @@ public class AddPlayerPacket : MinecraftPacket {
         Pitch = reader.Byte();
         ItemId = reader.UShort();
         ItemAuxValue = reader.UShort();
+        Metadata = reader.Remaining().ToArray();
     }
 
     public override void Encode(ref DataWriter writer) {

@@ -17,13 +17,6 @@ public class Chunk {
     public byte[,,] BlockLight => _blockLight;
     public byte[,,] SkyLight => _skyLight;
 
-    public byte GetBlock(int x, int y, int z) {
-        if (x < 0 || x >= 16 || y < 0 || y >= 128 || z < 0 || z >= 16)
-            return 0;
-
-        return _blockData[x, z, y];
-    }
-
     public static int[,] ReadMetadata(BinaryReader reader) {
         var metadata = new int[16, 16];
         for (var offset = 0; offset < SectorSize; offset += 4) {
@@ -56,7 +49,7 @@ public class Chunk {
 
         var chunkBuffer = reader.ReadBytes(82176);
 
-        var chunk = new Chunk() {
+        var chunk = new Chunk {
             _blockData = new byte[16, 16, 128],
             _blockMetadata = new byte[16, 128, 16],
             _blockLight = new byte[16, 128, 16],

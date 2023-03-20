@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 
 namespace MCPE.AlphaServer.Game;
@@ -9,6 +10,14 @@ public class World {
     private NbtFile _levelDat;
     private NbtFile _entitiesDat;
 
+    public string LevelName { get; private set; }
+    public int Seed { get; private set; }
+    public int SpawnX { get; private set; }
+    public int SpawnY { get; private set; }
+    public int SpawnZ { get; private set; }
+    public int Time { get; private set; }
+    
+    
     public Chunk this[int x, int z] => _chunks[x, z];
 
     public static World From(string folder) {
@@ -22,7 +31,7 @@ public class World {
 
         world._levelDat.LoadFromFileWithOffset(Path.Combine(folder, "level.dat"), 8);
         world._entitiesDat.LoadFromFileWithOffset(Path.Combine(folder, "entities.dat"), 12);
-
+        
         using var chunksDat = File.OpenRead(Path.Combine(folder, "chunks.dat"));
         using var chunkReader = new BinaryReader(chunksDat);
 
@@ -40,6 +49,26 @@ public class World {
             world._chunks[x, z] = Chunk.From(chunkReader);
         }
 
+        var levelRootTag = world._levelDat.RootTag;
+        
+        world.LevelName = levelRootTag["LevelName"].StringValue;
+        world.Seed = (int)levelRootTag["RandomSeed"].LongValue;
+        world.SpawnX = levelRootTag["SpawnX"].IntValue;
+        world.SpawnY = levelRootTag["SpawnY"].IntValue;
+        world.SpawnZ = levelRootTag["SpawnZ"].IntValue;
+        world.Time = (int)levelRootTag["Time"].LongValue;
+        
+
         return world;
+    }
+
+    public void PrintLevelData() {
+        foreach (var data in _levelDat.RootTag)
+            Console.WriteLine(data);
+    }
+    
+    public void PrintEntitiesData() {
+        foreach (var data in _entitiesDat.RootTag)
+            Console.WriteLine(data);
     }
 }

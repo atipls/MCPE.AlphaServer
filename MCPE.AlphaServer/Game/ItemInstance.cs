@@ -1,6 +1,6 @@
 ﻿namespace MCPE.AlphaServer.Game;
 
-public struct ItemInstance {
+public class ItemInstance {
     public int ItemID;
     public byte Count;
 

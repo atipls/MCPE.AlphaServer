@@ -21,8 +21,8 @@ public class GameServer : IConnectionHandler {
 
     private readonly ServerWorld ServerWorld;
 
-    public GameServer() {
-        ServerWorld = new ServerWorld(this);
+    public GameServer(World world) {
+        ServerWorld = new ServerWorld(this, world);
     }
 
     public void OnOpen(RakNetClient client) {
@@ -63,7 +63,7 @@ public class GameServer : IConnectionHandler {
         // We can log in, start the game.
         var newPlayer = ServerWorld.AddPlayer(client, packet.ClientId, packet.Username);
         client.Send(new StartGamePacket {
-                Seed = 1,
+                Seed = ServerWorld.World.Seed,
                 Pos = newPlayer.Position,
                 EntityId = newPlayer.EntityID,
                 Gamemode = 0,
