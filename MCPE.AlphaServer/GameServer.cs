@@ -38,12 +38,15 @@ public class GameServer : IConnectionHandler {
     public void OnData(RakNetClient client, ReadOnlyMemory<byte> data) {
         var packet = MinecraftPacket.Parse(data);
         var packetName = packet.GetType().Name[0..^6];
-        var handlerMethod = GetType().GetMethod($"Handle{packetName}", BindingFlags.Public | BindingFlags.Instance);
+        const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.Instance;
+        var handlerMethod = GetType().GetMethod($"Handle{packetName}", bindingFlags);
+        var genericHandlerMethod = GetType().GetMethod("HandleGeneric", bindingFlags);
 
         if (handlerMethod == null)
             Logger.Warn($"Handler not implemented for {packetName}. Bug?");
 
         handlerMethod?.Invoke(this, new object[] { client, packet });
+        genericHandlerMethod?.Invoke(this, new object[] { client, packet });
     }
 
     public void OnUpdate() { }
@@ -131,9 +134,7 @@ public class GameServer : IConnectionHandler {
     //public virtual void HandleChunkData(RakNetClient client, ChunkDataPacket packet) { }
     //public virtual void HandlePlayerEquipment(RakNetClient client, PlayerEquipmentPacket packet) { }
     //public virtual void HandlePlayerArmorEquipment(RakNetClient client, PlayerArmorEquipmentPacket packet) { }
-
-    public virtual void HandleInteract(RakNetClient client, InteractPacket packet) => ServerWorld.SendAll(packet);
-
+    //public virtual void HandleInteract(RakNetClient client, InteractPacket packet) { }
     //public virtual void HandleUseItem(RakNetClient client, UseItemPacket packet) { }
     //public virtual void HandlePlayerAction(RakNetClient client, PlayerActionPacket packet) { }
     //public virtual void HandleHurtArmor(RakNetClient client, HurtArmorPacket packet) { }

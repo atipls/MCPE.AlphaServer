@@ -51,9 +51,9 @@ public class Chunk {
 
         var chunk = new Chunk {
             _blockData = new byte[16, 16, 128],
-            _blockMetadata = new byte[16, 128, 16],
-            _blockLight = new byte[16, 128, 16],
-            _skyLight = new byte[16, 128, 16]
+            _blockMetadata = new byte[16, 16, 128],
+            _blockLight = new byte[16, 16, 128],
+            _skyLight = new byte[16, 16, 128]
         };
 
         const int sliceSize = 16 * 128 * 16;

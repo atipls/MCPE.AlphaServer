@@ -48,7 +48,7 @@ public class RakNetServer {
 
         // Try handling the connected packet, might fall through if the client reconnects?
         if (Connections.TryGetValue(receiveResult.RemoteEndPoint, out var existingConnection)) {
-            Logger.Debug($"Letting {existingConnection} handle packet");
+            // Logger.Debug($"Letting {existingConnection} handle packet");
             existingConnection.HandlePacket(receiveResult.Buffer);
             return;
         }
